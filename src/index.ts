@@ -11,12 +11,12 @@ app.use('/api/posts', postRoutes);
 app.use('/api/comments', commentRoutes);
 
 // 404 handler
-app.use((req, res, next) => {
-	res.status(404).json({ message: 'Resource not found' });
+app.use((_req, res) => {
+  res.status(404).json({ message: 'Resource not found' });
 });
 
 // Start server
 const port = process.env.PORT || '8000';
 app.listen(port, () => {
-	console.log('Server is running on '.concat(port));
+  console.log('Server is running on '.concat(port));
 });

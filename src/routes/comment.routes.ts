@@ -1,10 +1,10 @@
 import { Router } from 'express';
 import {
-	createComment,
-	deleteComment,
-	getAllComments,
-	getCommentById,
-	updateComment,
+  createComment,
+  deleteComment,
+  getAllComments,
+  getCommentById,
+  updateComment,
 } from '../controller/comment.controller';
 
 const router = Router();
