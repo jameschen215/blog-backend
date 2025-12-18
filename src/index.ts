@@ -1,10 +1,19 @@
 import 'dotenv/config';
 import express from 'express';
+import passport from 'passport';
+
 import authRoutes from './routes/auth.routes.js';
 import postRoutes from './routes/post.routes.js';
 import commentRoutes from './routes/comment.routes.js';
+import { jwtStrategy } from './auth/strategies/jwt.js';
 
 const app = express();
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Configure passport
+passport.use(jwtStrategy);
 
 app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
