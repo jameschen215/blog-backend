@@ -13,8 +13,50 @@ datasource db {
   provider = "postgresql"
 }
 
+enum Role {
+  READER
+  AUTHOR
+}
+
 model User {
-  id    Int     @id @default(autoincrement())
-  email String  @unique
-  name  String?
+  id       Int    @id @default(autoincrement())
+  email    String @unique
+  username String @unique
+  password String
+
+  role Role @default(READER)
+
+  posts    Post[] // One-to-Many: User has many Posts
+  comments Comment[] // One-to-Many: User has many Comments
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+}
+
+model Post {
+  id        Int     @id @default(autoincrement())
+  title     String
+  content   String
+  published Boolean @default(false) // Draft or published
+
+  authorId Int  @map("author_id")
+  author   User @relation(fields: [authorId], references: [id])
+
+  comments Comment[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+}
+
+model Comment {
+  id      Int    @id @default(autoincrement())
+  content String
+
+  post   Post @relation(fields: [postId], references: [id])
+  postId Int
+
+  author   User @relation(fields: [authorId], references: [id])
+  authorId Int
+
+  createdAt DateTime @default(now()) @map("created_at")
 }
