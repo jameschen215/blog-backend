@@ -1,4 +1,5 @@
 import { Router } from 'express';
+
 import {
   createPost,
   deletePost,
@@ -6,17 +7,18 @@ import {
   getPostById,
   updatePost,
 } from '../controller/post.controller';
+import { requireLogin, requireRole } from '../middleware/auth';
 
 const router = Router();
 
 router.get('/', getAllPosts);
 
-router.get('/:postId', getPostById);
+router.get('/:postId', requireLogin, getPostById);
 
-router.post('/', createPost);
+router.post('/', requireLogin, requireRole('AUTHOR'), createPost);
 
-router.put('/:postId', updatePost);
+router.put('/:postId', requireLogin, requireRole('AUTHOR'), updatePost);
 
-router.delete('/:postId', deletePost);
+router.delete('/:postId', requireLogin, requireRole('AUTHOR'), deletePost);
 
 export default router;

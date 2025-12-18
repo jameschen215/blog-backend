@@ -5,7 +5,7 @@ import passport from 'passport';
 import authRoutes from './routes/auth.routes.js';
 import postRoutes from './routes/post.routes.js';
 import commentRoutes from './routes/comment.routes.js';
-import { jwtStrategy } from './auth/strategies/jwt.js';
+import { jwtStrategy } from './config/passport.config.js';
 
 const app = express();
 

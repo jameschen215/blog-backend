@@ -3,8 +3,7 @@ import { prisma } from '../lib/prisma';
 
 export const getAllPosts: RequestHandler = async (req, res, next) => {
   try {
-    // const userId = req.user?.id; // From auth middleware
-    const userId = null;
+    const userId = req.user?.id; // From auth middleware
 
     const posts = await prisma.post.findMany({
       where: userId
@@ -39,7 +38,7 @@ export const getAllPosts: RequestHandler = async (req, res, next) => {
 
 export const getPostById: RequestHandler = async (req, res, next) => {
   try {
-    const userId = null; // auth not configured, null for temporary
+    const userId = req.user?.id;
     const postId = Number(req.params.postId);
 
     if (!postId || isNaN(postId)) {
