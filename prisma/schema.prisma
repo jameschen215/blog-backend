@@ -55,8 +55,12 @@ model Comment {
   post   Post @relation(fields: [postId], references: [id])
   postId Int
 
-  author   User @relation(fields: [authorId], references: [id])
-  authorId Int
+  // Make author optional for guest comments
+  author   User? @relation(fields: [authorId], references: [id])
+  authorId Int?
+
+  // For guest comments
+  guestName String? @map("guest_name")
 
   createdAt DateTime @default(now()) @map("created_at")
 }
