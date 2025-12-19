@@ -67,7 +67,7 @@ async function main() {
 
       await prisma.comment.create({
         data: {
-          content: faker.lorem.sentence(2),
+          content: faker.lorem.sentences(2),
           postId: post.id,
           authorId: randomUser.id,
         },

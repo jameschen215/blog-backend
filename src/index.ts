@@ -4,7 +4,6 @@ import passport from 'passport';
 
 import authRoutes from './routes/auth.routes.js';
 import postRoutes from './routes/post.routes.js';
-import commentRoutes from './routes/comment.routes.js';
 import { jwtStrategy } from './config/passport.config.js';
 
 const app = express();
@@ -17,7 +16,7 @@ passport.use(jwtStrategy);
 
 app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
-app.use('/api/comments', commentRoutes);
+// app.use('/api/comments', commentRoutes);
 
 // 404 handler
 app.use((_req, res) => {

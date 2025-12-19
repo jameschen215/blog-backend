@@ -49,16 +49,32 @@ export const registerUser: RequestHandler = async (req, res, next) => {
       },
     });
 
+    // Auto-claim guest comments if email matches
+    const claimedComments = await prisma.comment.updateMany({
+      where: { guestEmail: email, authorId: null },
+      data: {
+        authorId: newUser.id,
+        guestName: null,
+        guestEmail: null,
+      },
+    });
+
     // Generate token (auto-login after registration)
     const jwtPayload = { id: newUser.id, role: newUser.role };
     const secretKey = process.env.SECRET_KEY!;
     const token = jwt.sign(jwtPayload, secretKey, { expiresIn: '7d' });
 
+    const message =
+      claimedComments.count > 0
+        ? `User registered successfully. ${claimedComments.count} previous comment(s) claimed!`
+        : 'User registered successfully';
+
     res.status(201).json({
       success: true,
-      message: 'User registered successfully',
+      message,
       token,
       user: newUser,
+      claimedComments: claimedComments.count,
     });
   } catch (error) {
     next(error);

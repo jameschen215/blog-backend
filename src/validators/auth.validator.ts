@@ -6,7 +6,7 @@ export const loginSchema = z.object({
 });
 
 export const registerSchema = z.object({
-  email: z.email('Invalid email format'),
+  email: z.email('Invalid email'),
   username: z
     .string()
     .min(3, 'Username must be at least 3 characters.')
