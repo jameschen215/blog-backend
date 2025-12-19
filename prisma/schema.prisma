@@ -7,44 +7,52 @@ datasource db {
   provider = "postgresql"
 }
 
-model User {
-  id        Int       @id @default(autoincrement())
-  email     String    @unique
-  username  String    @unique
-  password  String
-  role      Role      @default(READER)
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @updatedAt @map("updated_at")
-  comments  Comment[]
-  posts     Post[]
-}
-
-model Post {
-  id        Int       @id @default(autoincrement())
-  title     String
-  content   String
-  published Boolean   @default(false)
-  authorId  Int       @map("author_id")
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime  @updatedAt @map("updated_at")
-  comments  Comment[]
-  author    User      @relation(fields: [authorId], references: [id])
-}
-
-model Comment {
-  id         Int      @id @default(autoincrement())
-  content    String
-  postId     Int      @map("post_id")
-  authorId   Int?     @map("author_id")
-  guestName  String?  @map("guest_name")
-  guestEmail String?  @map("guest_email")
-  createdAt  DateTime @default(now()) @map("created_at")
-  updatedAt  DateTime @updatedAt @map("updated_at")
-  author     User?    @relation(fields: [authorId], references: [id])
-  post       Post     @relation(fields: [postId], references: [id])
-}
-
 enum Role {
   READER
   AUTHOR
+}
+
+model User {
+  id       Int    @id @default(autoincrement())
+  email    String @unique
+  username String @unique
+  password String
+  role     Role   @default(READER)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  comments Comment[]
+  posts    Post[]
+}
+
+model Post {
+  id        Int     @id @default(autoincrement())
+  title     String
+  content   String
+  published Boolean @default(false)
+
+  authorId Int  @map("author_id")
+  author   User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  comments  Comment[]
+}
+
+model Comment {
+  id      Int    @id @default(autoincrement())
+  content String
+
+  postId Int  @map("post_id")
+  post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  authorId Int?  @map("author_id")
+  author   User? @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  guestName  String? @map("guest_name")
+  guestEmail String? @map("guest_email")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 }
