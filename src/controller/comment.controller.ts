@@ -70,10 +70,89 @@ export const createComment: RequestHandler = async (req, res, next) => {
   }
 };
 
-export const updateComment: RequestHandler = async (req, res) => {
-  res.send('Update comment');
+export const updateComment: RequestHandler = async (req, res, next) => {
+  try {
+    const userId = req.user!.id;
+    const commentId = Number(req.params.commentId);
+    const { content } = req.body;
+
+    const comment = await prisma.comment.findUnique({
+      where: { id: commentId },
+    });
+
+    if (!comment) {
+      return res.status(404).json({
+        success: false,
+        message: 'Comment not found',
+      });
+    }
+
+    // Only the author can update (no guest edits)
+    if (comment.authorId !== userId) {
+      return res.status(403).json({
+        success: false,
+        message: 'You can only edit your own comments',
+      });
+    }
+
+    const updatedComment = await prisma.comment.update({
+      where: { id: commentId },
+      data: { content },
+      select: {
+        id: true,
+        content: true,
+        createdAt: true,
+        author: { select: { id: true, username: true, role: true } },
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Comment updated successfully',
+      comment: updatedComment,
+    });
+  } catch (error) {
+    next(error);
+  }
 };
 
-export const deleteComment: RequestHandler = async (req, res) => {
-  res.send('Update comment');
+export const deleteComment: RequestHandler = async (req, res, next) => {
+  try {
+    const userId = req.user!.id;
+    const commentId = Number(req.params.commentId);
+
+    if (!commentId || isNaN(commentId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid comment ID',
+      });
+    }
+
+    const comment = await prisma.comment.findUnique({
+      where: { id: commentId },
+    });
+
+    if (!comment) {
+      return res.status(404).json({
+        success: false,
+        message: 'Comment not found',
+      });
+    }
+
+    if (comment.authorId !== userId) {
+      return res.status(403).json({
+        success: false,
+        message: 'You can only delete your own comments',
+      });
+    }
+
+    await prisma.comment.delete({ where: { id: commentId } });
+
+    res.status(200).json({
+      success: true,
+      message: 'Comment deleted successfully',
+    });
+  } catch (error) {
+    next(error);
+  }
 };
