@@ -98,14 +98,160 @@ export const getPostById: RequestHandler = async (req, res, next) => {
   }
 };
 
-export const createPost: RequestHandler = async (req, res) => {
-  res.send('Create post');
+export const createPost: RequestHandler = async (req, res, next) => {
+  try {
+    const authorId = req.user!.id;
+    const { title, content, published } = req.body;
+
+    const post = await prisma.post.create({
+      data: {
+        title,
+        content,
+        published: published || false,
+        authorId,
+      },
+      select: {
+        id: true,
+        title: true,
+        content: true,
+        published: true,
+        createdAt: true,
+        updatedAt: true,
+        author: {
+          select: {
+            id: true,
+            username: true,
+            role: true,
+          },
+        },
+      },
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'Post created successfully',
+      post,
+    });
+  } catch (error) {
+    next(error);
+  }
 };
 
-export const updatePost: RequestHandler = async (req, res) => {
-  res.send('Update post');
+export const updatePost: RequestHandler = async (req, res, next) => {
+  try {
+    const userId = req.user!.id;
+    const postId = Number(req.params.postId);
+    const { title, content, published } = req.body;
+
+    if (!postId || isNaN(postId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid post ID',
+      });
+    }
+
+    // Check if at least one field is provided
+    if (!title && !content && !published) {
+      return res.status(400).json({
+        success: false,
+        message: 'At least one field must be provided',
+      });
+    }
+
+    // Check if post exists and user is the author
+    const existingPost = await prisma.post.findUnique({
+      where: { id: postId },
+    });
+
+    if (!existingPost) {
+      return res.status(404).json({
+        success: false,
+        message: 'Post not found',
+      });
+    }
+
+    if (existingPost.authorId !== userId) {
+      return res.status(403).json({
+        success: false,
+        message: "Cannot update other people's posts",
+      });
+    }
+
+    const post = await prisma.post.update({
+      where: { id: postId },
+      data: {
+        ...(title && { title }),
+        ...(content && { content }),
+        ...(published !== undefined && { published }),
+      },
+      select: {
+        id: true,
+        title: true,
+        content: true,
+        published: true,
+        createdAt: true,
+        updatedAt: true,
+        author: {
+          select: {
+            id: true,
+            username: true,
+            role: true,
+          },
+        },
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Post updated successfully',
+      post,
+    });
+  } catch (error) {
+    next(error);
+  }
 };
 
-export const deletePost: RequestHandler = async (req, res) => {
-  res.send('Update post');
+export const deletePost: RequestHandler = async (req, res, next) => {
+  try {
+    const userId = req.user!.id;
+    const postId = Number(req.params.postId);
+
+    // Check if post ID is valid
+    if (!postId || isNaN(postId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid post ID',
+      });
+    }
+
+    // Check if post exists and user is the author
+    const existingPost = await prisma.post.findUnique({
+      where: { id: postId },
+    });
+
+    if (!existingPost) {
+      return res.status(404).json({
+        success: false,
+        message: 'Post not found',
+      });
+    }
+
+    if (existingPost.authorId !== userId) {
+      return res.status(403).json({
+        success: false,
+        message: "Cannot delete other people's posts",
+      });
+    }
+
+    await prisma.post.delete({
+      where: { id: postId },
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Post deleted successfully',
+    });
+  } catch (error) {
+    next(error);
+  }
 };
