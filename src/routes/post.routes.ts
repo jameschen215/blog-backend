@@ -12,7 +12,7 @@ import {
   updatePostSchema,
 } from '../validators/post.validator';
 import { validate } from '../middleware/validate';
-import { requireLogin, requireRole } from '../middleware/auth';
+import { requireLogin } from '../middleware/auth';
 import {
   createCommentSchema,
   updateCommentSchema,
@@ -29,23 +29,11 @@ const router = Router();
 router.get('/', getAllPosts);
 router.get('/:postId', getPostById);
 
-router.post(
-  '/',
-  requireLogin,
-  requireRole('AUTHOR'),
-  validate(createPostSchema),
-  createPost
-);
+router.post('/', requireLogin, validate(createPostSchema), createPost);
 
-router.put(
-  '/:postId',
-  requireLogin,
-  requireRole('AUTHOR'),
-  validate(updatePostSchema),
-  updatePost
-);
+router.put('/:postId', requireLogin, validate(updatePostSchema), updatePost);
 
-router.delete('/:postId', requireLogin, requireRole('AUTHOR'), deletePost);
+router.delete('/:postId', requireLogin, deletePost);
 
 // Comment routes
 router.post('/:postId/comments', validate(createCommentSchema), createComment);

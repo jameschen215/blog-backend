@@ -8,8 +8,7 @@
     "lib": ["esnext"],
     "strict": true,
     "skipLibCheck": true,
-    "esModuleInterop": true,
-    "ignoreDeprecations": "6.0"
+    "esModuleInterop": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]

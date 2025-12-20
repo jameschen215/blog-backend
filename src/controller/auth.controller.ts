@@ -49,13 +49,13 @@ export const registerUser: RequestHandler = async (req, res, next) => {
       },
     });
 
-    // Auto-claim guest comments if email matches
+    // Auto-claim guest comments if email matches and keep guestName in case user is deleted
     const claimedComments = await prisma.comment.updateMany({
       where: { guestEmail: email, authorId: null },
       data: {
         authorId: newUser.id,
-        guestName: null,
         guestEmail: null,
+        // guestName: null,
       },
     });
 
@@ -73,7 +73,12 @@ export const registerUser: RequestHandler = async (req, res, next) => {
       success: true,
       message,
       token,
-      user: newUser,
+      user: {
+        id: newUser.id,
+        username: newUser.username,
+        email: newUser.email,
+        role: newUser.role,
+      },
       claimedComments: claimedComments.count,
     });
   } catch (error) {

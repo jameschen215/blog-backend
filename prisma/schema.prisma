@@ -8,8 +8,8 @@ datasource db {
 }
 
 enum Role {
-  READER
-  AUTHOR
+  ADMIN
+  USER
 }
 
 model User {
@@ -17,7 +17,7 @@ model User {
   email    String @unique
   username String @unique
   password String
-  role     Role   @default(READER)
+  role     Role   @default(USER)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -32,8 +32,9 @@ model Post {
   content   String
   published Boolean @default(false)
 
+  // Restrict - Can't delete a user who has posts → prevents accidental deletion
+  author   User @relation(fields: [authorId], references: [id], onDelete: Restrict)
   authorId Int  @map("author_id")
-  author   User @relation(fields: [authorId], references: [id], onDelete: Cascade)
 
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
@@ -44,11 +45,13 @@ model Comment {
   id      Int    @id @default(autoincrement())
   content String
 
-  postId Int  @map("post_id")
+  // Cascade: Deleting a post deletes all their comments → data loss
   post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId Int  @map("post_id")
 
+  // SetNull - Comments remain visible even if user is deleted
+  author   User? @relation(fields: [authorId], references: [id], onDelete: SetNull)
   authorId Int?  @map("author_id")
-  author   User? @relation(fields: [authorId], references: [id], onDelete: Cascade)
 
   guestName  String? @map("guest_name")
   guestEmail String? @map("guest_email")

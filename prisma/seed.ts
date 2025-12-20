@@ -27,7 +27,7 @@ async function main() {
       email: 'james@odin.com',
       username: 'james.chen',
       password: hashedPassword,
-      role: Role.AUTHOR,
+      role: Role.ADMIN,
     },
   });
 
@@ -38,7 +38,7 @@ async function main() {
           email: faker.internet.email(),
           username: faker.internet.username(),
           password: hashedPassword,
-          role: Role.READER,
+          role: Role.USER,
         },
       })
     )
