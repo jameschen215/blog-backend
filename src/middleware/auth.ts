@@ -1,5 +1,5 @@
-import { RequestHandler } from 'express';
 import passport from 'passport';
+import { RequestHandler } from 'express';
 import { Role } from '../generated/prisma/client';
 
 export const requireLogin: RequestHandler = (req, res, next) => {

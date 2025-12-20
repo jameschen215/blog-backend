@@ -5,10 +5,10 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import passport from 'passport';
 
-import { jwtStrategy } from './config/passport.config.js';
-import authRoutes from './routes/auth.routes.js';
-import postRoutes from './routes/post.routes.js';
-import { errorHandler } from './middleware/error-handler.js';
+import { jwtStrategy } from './config/passport.config';
+import authRoutes from './routes/auth.routes';
+import postRoutes from './routes/post.routes';
+import { errorHandler } from './middleware/error-handler';
 
 const app = express();
 
