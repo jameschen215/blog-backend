@@ -38,7 +38,7 @@ export const registerUser: RequestHandler = async (req, res, next) => {
         email,
         username,
         password: hashedPassword,
-        role: role || 'READER',
+        role: role || 'USER',
       },
       select: {
         id: true,

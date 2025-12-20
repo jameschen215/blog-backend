@@ -60,3 +60,9 @@
 ```TypeScript
 import authRoutes from './routes/auth.routes';  // Remove .js
 ```
+
+temporary for commit message:
+
+1. 'READER' role in register controller should be 'USER'
+2. Use published === undefined to check if boolean variable have a value
+   in updatePost controller

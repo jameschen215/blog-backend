@@ -87,6 +87,10 @@ export const getPostById: RequestHandler = async (req, res, next) => {
         .json({ success: false, message: 'Post not found' });
     }
 
+    console.log('Post author ID: ', post.author.id);
+    console.log('User ID: ', userId);
+    console.log('User ID = Post author ID : ', post.author.id === userId);
+
     // Authorization check: unpublished posts only visible to author
     if (!post.published && post.author.id !== userId) {
       return res.status(403).json({ success: false, message: 'Access denied' });
@@ -149,9 +153,10 @@ export const updatePost: RequestHandler = async (req, res, next) => {
         message: 'Invalid post ID',
       });
     }
+    console.log({ published });
 
-    // Check if at least one field is provided
-    if (!title && !content && !published) {
+    // Check if at least one field is provided - be careful for boolean value false
+    if (!title && !content && published === undefined) {
       return res.status(400).json({
         success: false,
         message: 'At least one field must be provided',
