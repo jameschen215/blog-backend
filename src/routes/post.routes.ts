@@ -5,6 +5,7 @@ import {
   deletePost,
   getAllPosts,
   getPostById,
+  getPostsByAuthor,
   updatePost,
 } from '../controller/post.controller';
 import {
@@ -27,6 +28,7 @@ const router = Router();
 
 // Post routes
 router.get('/', optionalAuth, getAllPosts);
+router.get('/author/:authorId', optionalAuth, getPostsByAuthor);
 router.get('/:postId', optionalAuth, getPostById);
 
 router.post('/', requireLogin, validate(createPostSchema), createPost);
