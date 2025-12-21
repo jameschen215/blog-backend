@@ -74,6 +74,8 @@ export const getPostById: RequestHandler = async (req, res, next) => {
             id: true,
             content: true,
             createdAt: true,
+            guestName: true,
+            guestEmail: true,
             author: {
               select: {
                 id: true,
