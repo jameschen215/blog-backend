@@ -7,8 +7,13 @@ export const getAllPosts: RequestHandler = async (req, res, next) => {
 
     const posts = await prisma.post.findMany({
       where: userId
-        ? { authorId: userId } // If authenticated, show their posts (including drafts)
-        : { published: true }, // If not authenticated, show only published posts
+        ? {
+            OR: [
+              { published: true }, // Users see published
+              { authorId: userId, published: false }, // And their own drafts
+            ],
+          }
+        : { published: true }, // Guests only see published
       orderBy: { createdAt: 'desc' },
       select: {
         id: true,
@@ -82,18 +87,18 @@ export const getPostById: RequestHandler = async (req, res, next) => {
     });
 
     if (!post) {
-      return res
-        .status(404)
-        .json({ success: false, message: 'Post not found' });
+      return res.status(404).json({
+        success: false,
+        message: 'Post not found',
+      });
     }
-
-    console.log('Post author ID: ', post.author.id);
-    console.log('User ID: ', userId);
-    console.log('User ID = Post author ID : ', post.author.id === userId);
 
     // Authorization check: unpublished posts only visible to author
     if (!post.published && post.author.id !== userId) {
-      return res.status(403).json({ success: false, message: 'Access denied' });
+      return res.status(403).json({
+        success: false,
+        message: 'The post is not published',
+      });
     }
 
     res.status(200).json({ success: true, post });

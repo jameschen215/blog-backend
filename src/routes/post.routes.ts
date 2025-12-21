@@ -12,7 +12,7 @@ import {
   updatePostSchema,
 } from '../validators/post.validator';
 import { validate } from '../middleware/validate';
-import { requireLogin } from '../middleware/auth';
+import { optionalAuth, requireLogin } from '../middleware/auth';
 import {
   createCommentSchema,
   updateCommentSchema,
@@ -26,8 +26,8 @@ import {
 const router = Router();
 
 // Post routes
-router.get('/', getAllPosts);
-router.get('/:postId', getPostById);
+router.get('/', optionalAuth, getAllPosts);
+router.get('/:postId', optionalAuth, getPostById);
 
 router.post('/', requireLogin, validate(createPostSchema), createPost);
 
