@@ -36,7 +36,12 @@ router.put('/:postId', requireLogin, validate(updatePostSchema), updatePost);
 router.delete('/:postId', requireLogin, deletePost);
 
 // Comment routes
-router.post('/:postId/comments', validate(createCommentSchema), createComment);
+router.post(
+  '/:postId/comments',
+  optionalAuth,
+  validate(createCommentSchema),
+  createComment
+);
 router.put(
   '/:postId/comments/:commentId',
   requireLogin,
