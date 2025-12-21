@@ -23,6 +23,7 @@ import {
   deleteComment,
   updateComment,
 } from '../controller/comment.controller';
+import { commentLimiter, postLimiter } from '../config/rage-limit.config';
 
 const router = Router();
 
@@ -31,15 +32,20 @@ router.get('/', optionalAuth, getAllPosts);
 router.get('/author/:authorId', optionalAuth, getPostsByAuthor);
 router.get('/:postId', optionalAuth, getPostById);
 
-router.post('/', requireLogin, validate(createPostSchema), createPost);
-
+router.post(
+  '/',
+  requireLogin,
+  postLimiter,
+  validate(createPostSchema),
+  createPost
+);
 router.put('/:postId', requireLogin, validate(updatePostSchema), updatePost);
-
 router.delete('/:postId', requireLogin, deletePost);
 
 // Comment routes
 router.post(
   '/:postId/comments',
+  commentLimiter,
   optionalAuth,
   validate(createCommentSchema),
   createComment

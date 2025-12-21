@@ -61,6 +61,8 @@
 import authRoutes from './routes/auth.routes';  // Remove .js
 ```
 
-## PROBLEM TO BE SOLVED:
+## Generate a random secret using Node’s crypto module
 
-1. Authenticated users cannot get their unpublished posts
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```

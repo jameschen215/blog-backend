@@ -5,10 +5,11 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import passport from 'passport';
 
-import { jwtStrategy } from './config/passport.config';
 import authRoutes from './routes/auth.routes';
 import postRoutes from './routes/post.routes';
+import { jwtStrategy } from './config/passport.config';
 import { errorHandler } from './middleware/error-handler';
+import { generalLimiter } from './config/rage-limit.config';
 
 const app = express();
 
@@ -18,6 +19,9 @@ app.use(helmet());
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Apply general rate limiter to all routes
+app.use('/api', generalLimiter);
 
 // Passport configuration
 passport.use(jwtStrategy);

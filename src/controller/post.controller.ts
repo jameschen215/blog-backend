@@ -22,34 +22,31 @@ export const getAllPosts: RequestHandler = async (req, res, next) => {
       ? { OR: [{ published: true }, { authorId: userId, published: false }] }
       : { published: true };
 
-    // Fetch posts and total count in parallel
-    const [posts, total] = await prisma.$transaction([
-      prisma.post.findMany({
-        where,
-        orderBy: { createdAt: 'desc' },
-        skip,
-        take: limit,
-        select: {
-          id: true,
-          title: true,
-          content: true,
-          published: true,
-          createdAt: true,
-          updatedAt: true,
-          author: {
-            select: {
-              id: true,
-              username: true,
-              role: true,
-            },
-          },
-          _count: {
-            select: { comments: true },
+    const total = await prisma.post.count({ where });
+    const posts = await prisma.post.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      skip,
+      take: limit,
+      select: {
+        id: true,
+        title: true,
+        content: true,
+        published: true,
+        createdAt: true,
+        updatedAt: true,
+        author: {
+          select: {
+            id: true,
+            username: true,
+            role: true,
           },
         },
-      }),
-      prisma.post.count({ where }),
-    ]);
+        _count: {
+          select: { comments: true },
+        },
+      },
+    });
 
     res.status(200).json({
       success: true,
@@ -93,26 +90,24 @@ export const getPostsByAuthor: RequestHandler = async (req, res, next) => {
       ...(userId === authorId ? {} : { published: true }),
     };
 
-    const [posts, total] = await prisma.$transaction([
-      prisma.post.findMany({
-        where,
-        orderBy: { createdAt: 'desc' },
-        skip,
-        take: limit,
-        select: {
-          id: true,
-          title: true,
-          content: true,
-          published: true,
-          createdAt: true,
-          updatedAt: true,
-          _count: {
-            select: { comments: true },
-          },
+    const total = await prisma.post.count({ where });
+    const posts = await prisma.post.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      skip,
+      take: limit,
+      select: {
+        id: true,
+        title: true,
+        content: true,
+        published: true,
+        createdAt: true,
+        updatedAt: true,
+        _count: {
+          select: { comments: true },
         },
-      }),
-      prisma.post.count({ where }),
-    ]);
+      },
+    });
 
     res.status(200).json({
       success: true,
