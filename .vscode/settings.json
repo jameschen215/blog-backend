@@ -1,5 +1,5 @@
 {
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "cSpell.words": ["ESM", "fkey", "nonoptional", "pkey", "Zod"]
+  "cSpell.words": ["env", "ESM", "fkey", "nonoptional", "pkey", "Zod"]
 }

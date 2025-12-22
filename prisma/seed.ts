@@ -3,15 +3,19 @@ import bcrypt from 'bcrypt';
 import { faker } from '@faker-js/faker';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient, Role } from '../src/generated/prisma/client';
+import { getRandomInt } from '../src/lib/utils';
 
 const connectionString = `${process.env.DATABASE_URL}`;
 
 const adapter = new PrismaPg({ connectionString });
 const prisma = new PrismaClient({ adapter });
 
-const USERS_COUNT = 7;
-const POSTS_PER_USER = 3;
-const COMMENTS_PER_POST = 5;
+const SALT_ROUNDS = 10;
+const USERS_COUNT = getRandomInt({ min: 3, max: 5 });
+const POSTS_PER_USER = getRandomInt({ min: 3, max: 10 });
+const COMMENTS_PER_POST = getRandomInt({ min: 3, max: 5 });
+
+console.log({ USERS_COUNT, POSTS_PER_USER, COMMENTS_PER_POST });
 
 async function main() {
   // 1. Clean database (dev only)
@@ -20,9 +24,9 @@ async function main() {
   await prisma.user.deleteMany();
 
   // 2. Create users
-  const hashedPassword = await bcrypt.hash('123456', 10);
+  const hashedPassword = await bcrypt.hash('123456', SALT_ROUNDS);
 
-  const author = await prisma.user.create({
+  const admin = await prisma.user.create({
     data: {
       email: 'james@odin.com',
       username: 'james.chen',
@@ -44,20 +48,35 @@ async function main() {
     )
   );
 
-  // 3. Create posts (only authors)
+  // 3. Create posts
   const posts = [];
 
   for (let i = 0; i < POSTS_PER_USER; i++) {
     const post = await prisma.post.create({
       data: {
         title: faker.lorem.sentence(),
-        content: faker.lorem.paragraphs(5),
+        content: faker.lorem.paragraphs(getRandomInt({ min: 4, max: 10 })),
         published: faker.datatype.boolean(),
-        authorId: author.id,
+        authorId: admin.id,
       },
     });
 
     posts.push(post);
+  }
+
+  for (const user of users) {
+    for (let i = 0; i < POSTS_PER_USER; i++) {
+      const post = await prisma.post.create({
+        data: {
+          title: faker.lorem.sentence(),
+          content: faker.lorem.paragraphs(getRandomInt({ min: 4, max: 10 })),
+          published: faker.datatype.boolean(),
+          authorId: user.id,
+        },
+      });
+
+      posts.push(post);
+    }
   }
 
   // 4. Create comments (any user can comment)
@@ -67,13 +86,15 @@ async function main() {
 
       await prisma.comment.create({
         data: {
-          content: faker.lorem.sentences(2),
+          content: faker.lorem.sentences(getRandomInt({ max: 5 })),
           postId: post.id,
           authorId: randomUser.id,
         },
       });
     }
   }
+
+  console.log('Posts: ', posts.length);
 
   console.log('🌱 Database seeded successfully!');
 }
