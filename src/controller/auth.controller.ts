@@ -62,13 +62,7 @@ export const registerUser: RequestHandler = async (req, res, next) => {
     const secretKey = process.env.SECRET_KEY!;
     const token = jwt.sign(jwtPayload, secretKey, { expiresIn: '7d' });
 
-    const message =
-      claimedComments.count > 0
-        ? `User registered successfully. ${claimedComments.count} previous comment(s) claimed!`
-        : 'User registered successfully';
-
     res.status(201).json({
-      message,
       token,
       user: {
         id: newUser.id,

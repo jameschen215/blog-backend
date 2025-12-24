@@ -123,46 +123,6 @@ export const getPostsByAuthor: RequestHandler = async (req, res, next) => {
   }
 };
 
-// export const getAllPosts: RequestHandler = async (req, res, next) => {
-//   try {
-//     const userId = req.user?.id; // From auth middleware
-
-//     const posts = await prisma.post.findMany({
-//       where: userId
-//         ? {
-//             OR: [
-//               { published: true }, // Users see published
-//               { authorId: userId, published: false }, // And their own drafts
-//             ],
-//           }
-//         : { published: true }, // Guests only see published
-//       orderBy: { createdAt: 'desc' },
-//       select: {
-//         id: true,
-//         title: true,
-//         content: true,
-//         published: true,
-//         createdAt: true,
-//         updatedAt: true,
-//         author: {
-//           select: {
-//             id: true,
-//             username: true,
-//             role: true,
-//           },
-//         },
-//         _count: {
-//           select: { comments: true },
-//         },
-//       },
-//     });
-
-//     res.status(200).json({ success: true, count: posts.length, posts });
-//   } catch (error) {
-//     next(error);
-//   }
-// };
-
 export const getPostById: RequestHandler = async (req, res, next) => {
   try {
     const userId = req.user?.id;
@@ -221,7 +181,7 @@ export const getPostById: RequestHandler = async (req, res, next) => {
       });
     }
 
-    res.status(200).json({ success: true, post });
+    res.status(200).json({ post });
   } catch (error) {
     next(error);
   }
