@@ -9,7 +9,6 @@ export const validate = (schema: ZodType): RequestHandler => {
     } catch (error) {
       if (error instanceof ZodError) {
         return res.status(400).json({
-          success: false,
           message: 'Validation error',
           errors: error.issues.map((err) => ({
             field: err.path.join('.'),

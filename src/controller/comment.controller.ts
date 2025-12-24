@@ -8,7 +8,6 @@ export const createComment: RequestHandler = async (req, res, next) => {
 
     if (!postId || isNaN(postId)) {
       return res.status(400).json({
-        success: false,
         message: 'Invalid post ID',
       });
     }
@@ -16,7 +15,6 @@ export const createComment: RequestHandler = async (req, res, next) => {
     // If not authenticated, guestName is required
     if (!userId && !guestName) {
       return res.status(400).json({
-        success: false,
         message: 'Name is required for guest comments',
       });
     }
@@ -29,14 +27,12 @@ export const createComment: RequestHandler = async (req, res, next) => {
 
     if (!post) {
       return res.status(404).json({
-        success: false,
         message: 'Post not found',
       });
     }
 
     if (!post.published) {
       return res.status(403).json({
-        success: false,
         message: 'Cannot comment on unpublished posts',
       });
     }
@@ -61,8 +57,6 @@ export const createComment: RequestHandler = async (req, res, next) => {
     });
 
     return res.status(201).json({
-      success: true,
-      message: 'Comment posted successfully',
       comment,
     });
   } catch (error) {
@@ -82,7 +76,6 @@ export const updateComment: RequestHandler = async (req, res, next) => {
 
     if (!comment) {
       return res.status(404).json({
-        success: false,
         message: 'Comment not found',
       });
     }
@@ -90,7 +83,6 @@ export const updateComment: RequestHandler = async (req, res, next) => {
     // Only the author can update (no guest edits)
     if (comment.authorId !== userId) {
       return res.status(403).json({
-        success: false,
         message: 'You can only edit your own comments',
       });
     }
@@ -107,8 +99,6 @@ export const updateComment: RequestHandler = async (req, res, next) => {
     });
 
     res.status(200).json({
-      success: true,
-      message: 'Comment updated successfully',
       comment: updatedComment,
     });
   } catch (error) {
@@ -123,7 +113,6 @@ export const deleteComment: RequestHandler = async (req, res, next) => {
 
     if (!commentId || isNaN(commentId)) {
       return res.status(400).json({
-        success: false,
         message: 'Invalid comment ID',
       });
     }
@@ -134,24 +123,19 @@ export const deleteComment: RequestHandler = async (req, res, next) => {
 
     if (!comment) {
       return res.status(404).json({
-        success: false,
         message: 'Comment not found',
       });
     }
 
     if (comment.authorId !== userId) {
       return res.status(403).json({
-        success: false,
         message: 'You can only delete your own comments',
       });
     }
 
     await prisma.comment.delete({ where: { id: commentId } });
 
-    res.status(200).json({
-      success: true,
-      message: 'Comment deleted successfully',
-    });
+    res.sendStatus(204);
   } catch (error) {
     next(error);
   }

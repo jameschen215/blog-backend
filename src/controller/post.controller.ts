@@ -49,7 +49,6 @@ export const getAllPosts: RequestHandler = async (req, res, next) => {
     });
 
     res.status(200).json({
-      success: true,
       posts,
       pagination: {
         page,
@@ -72,7 +71,6 @@ export const getPostsByAuthor: RequestHandler = async (req, res, next) => {
 
     if (!authorId || isNaN(authorId)) {
       return res.status(400).json({
-        success: false,
         message: 'Invalid author ID',
       });
     }
@@ -110,7 +108,6 @@ export const getPostsByAuthor: RequestHandler = async (req, res, next) => {
     });
 
     res.status(200).json({
-      success: true,
       posts,
       pagination: {
         page,
@@ -172,9 +169,7 @@ export const getPostById: RequestHandler = async (req, res, next) => {
     const postId = Number(req.params.postId);
 
     if (!postId || isNaN(postId)) {
-      return res
-        .status(400)
-        .json({ success: false, message: 'Invalid post ID' });
+      return res.status(400).json({ message: 'Invalid post ID' });
     }
 
     const post = await prisma.post.findUnique({
@@ -215,7 +210,6 @@ export const getPostById: RequestHandler = async (req, res, next) => {
 
     if (!post) {
       return res.status(404).json({
-        success: false,
         message: 'Post not found',
       });
     }
@@ -223,7 +217,6 @@ export const getPostById: RequestHandler = async (req, res, next) => {
     // Authorization check: unpublished posts only visible to author
     if (!post.published && post.author.id !== userId) {
       return res.status(403).json({
-        success: false,
         message: 'The post is not published',
       });
     }
@@ -263,11 +256,7 @@ export const createPost: RequestHandler = async (req, res, next) => {
       },
     });
 
-    res.status(201).json({
-      success: true,
-      message: 'Post created successfully',
-      post,
-    });
+    res.status(201).json({ post });
   } catch (error) {
     next(error);
   }
@@ -281,7 +270,6 @@ export const updatePost: RequestHandler = async (req, res, next) => {
 
     if (!postId || isNaN(postId)) {
       return res.status(400).json({
-        success: false,
         message: 'Invalid post ID',
       });
     }
@@ -290,7 +278,6 @@ export const updatePost: RequestHandler = async (req, res, next) => {
     // Check if at least one field is provided - be careful for boolean value false
     if (!title && !content && published === undefined) {
       return res.status(400).json({
-        success: false,
         message: 'At least one field must be provided',
       });
     }
@@ -302,14 +289,12 @@ export const updatePost: RequestHandler = async (req, res, next) => {
 
     if (!existingPost) {
       return res.status(404).json({
-        success: false,
         message: 'Post not found',
       });
     }
 
     if (existingPost.authorId !== userId) {
       return res.status(403).json({
-        success: false,
         message: "Cannot update other people's posts",
       });
     }
@@ -338,11 +323,7 @@ export const updatePost: RequestHandler = async (req, res, next) => {
       },
     });
 
-    res.status(200).json({
-      success: true,
-      message: 'Post updated successfully',
-      post,
-    });
+    res.status(200).json({ post });
   } catch (error) {
     next(error);
   }
@@ -356,7 +337,6 @@ export const deletePost: RequestHandler = async (req, res, next) => {
     // Check if post ID is valid
     if (!postId || isNaN(postId)) {
       return res.status(400).json({
-        success: false,
         message: 'Invalid post ID',
       });
     }
@@ -368,14 +348,12 @@ export const deletePost: RequestHandler = async (req, res, next) => {
 
     if (!existingPost) {
       return res.status(404).json({
-        success: false,
         message: 'Post not found',
       });
     }
 
     if (existingPost.authorId !== userId) {
       return res.status(403).json({
-        success: false,
         message: "Cannot delete other people's posts",
       });
     }
@@ -384,10 +362,7 @@ export const deletePost: RequestHandler = async (req, res, next) => {
       where: { id: postId },
     });
 
-    res.status(200).json({
-      success: true,
-      message: 'Post deleted successfully',
-    });
+    res.sendStatus(204);
   } catch (error) {
     next(error);
   }

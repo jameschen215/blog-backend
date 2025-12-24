@@ -7,7 +7,6 @@ export const generalLimiter = rateLimit({
   windowMs: 1000 * 60 * 15,
   max: 100,
   message: {
-    success: false,
     message: 'Too many requests, please try again later',
   },
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
@@ -19,7 +18,6 @@ export const authLimiter = rateLimit({
   windowMs: 1000 * 60 * 15,
   max: 5,
   message: {
-    success: false,
     message: 'Too many authentication attempts, please try again later',
   },
   standardHeaders: true,
@@ -32,7 +30,6 @@ export const postLimiter = rateLimit({
   windowMs: 1000 * 60 * 60,
   max: 5,
   message: {
-    success: false,
     message: 'Too many posts created, please try again later',
   },
   standardHeaders: true,
@@ -44,7 +41,6 @@ export const commentLimiter = rateLimit({
   windowMs: 1000 * 60 * 60,
   max: 10,
   message: {
-    success: false,
     message: 'Too many comments, please try again later',
   },
   standardHeaders: true,

@@ -11,7 +11,6 @@ export const requireLogin: RequestHandler = (req, res, next) => {
 
       if (!user) {
         return res.status(401).json({
-          success: false,
           message: 'Authentication required',
         });
       }
@@ -45,14 +44,11 @@ export const optionalAuth: RequestHandler = (req, res, next) => {
 export const requireRole = (...roles: Role[]): RequestHandler => {
   return (req, res, next) => {
     if (!req.user) {
-      return res
-        .status(401)
-        .json({ success: false, message: 'Authentication required' });
+      return res.status(401).json({ message: 'Authentication required' });
     }
 
     if (!roles.includes(req.user.role)) {
       return res.status(403).json({
-        success: false,
         message: 'Insufficient permissions',
       });
     }

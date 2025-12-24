@@ -15,14 +15,12 @@ export const registerUser: RequestHandler = async (req, res, next) => {
     if (existingUser) {
       if (existingUser.email === email) {
         return res.status(409).json({
-          success: false,
           message: 'Email already registered',
         });
       }
 
       if (existingUser.username === username) {
         return res.status(409).json({
-          success: false,
           message: 'Username already taken',
         });
       }
@@ -70,7 +68,6 @@ export const registerUser: RequestHandler = async (req, res, next) => {
         : 'User registered successfully';
 
     res.status(201).json({
-      success: true,
       message,
       token,
       user: {
@@ -95,9 +92,7 @@ export const loginUser: RequestHandler = async (req, res, next) => {
     });
 
     if (!user) {
-      return res
-        .status(401)
-        .json({ success: false, message: 'Invalid credentials' });
+      return res.status(401).json({ message: 'Invalid credentials' });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
@@ -112,8 +107,6 @@ export const loginUser: RequestHandler = async (req, res, next) => {
     });
 
     res.status(200).json({
-      success: true,
-      message: 'Login successfully',
       token,
       user: {
         id: user.id,
