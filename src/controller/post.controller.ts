@@ -362,7 +362,7 @@ export const deletePost: RequestHandler = async (req, res, next) => {
       where: { id: postId },
     });
 
-    res.sendStatus(204);
+    res.sendStatus(204).end();
   } catch (error) {
     next(error);
   }

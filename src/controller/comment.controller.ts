@@ -135,7 +135,7 @@ export const deleteComment: RequestHandler = async (req, res, next) => {
 
     await prisma.comment.delete({ where: { id: commentId } });
 
-    res.sendStatus(204);
+    res.sendStatus(204).end();
   } catch (error) {
     next(error);
   }
