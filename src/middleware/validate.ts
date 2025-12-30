@@ -8,6 +8,8 @@ export const validate = (schema: ZodType): RequestHandler => {
       next();
     } catch (error) {
       if (error instanceof ZodError) {
+        console.log(error.issues);
+
         return res.status(400).json({
           message: 'Validation error',
           errors: error.issues.map((err) => ({

@@ -7,8 +7,6 @@ export const createCommentSchema = z.object({
     .max(500, 'Comment must be 500 characters or less')
     .trim(),
 
-  postId: z.number().int().positive(),
-
   // For guest comments
   guestName: z
     .string()

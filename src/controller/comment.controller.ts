@@ -4,9 +4,10 @@ import { prisma } from '../lib/prisma';
 export const createComment: RequestHandler = async (req, res, next) => {
   try {
     const userId = req.user?.id;
-    const { content, postId, guestName, guestEmail } = req.body;
+    const postId = Number(req.params.postId) || null;
+    const { content, guestName, guestEmail } = req.body;
 
-    if (!postId || isNaN(postId)) {
+    if (!postId || isNaN(postId) || postId <= 0) {
       return res.status(400).json({
         message: 'Invalid post ID',
       });
