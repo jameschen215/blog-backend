@@ -22,8 +22,11 @@ model User {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  comments Comment[]
   posts    Post[]
+  comments Comment[]
+  likes    Like[]
+
+  @@map("users")
 }
 
 model Post {
@@ -39,6 +42,9 @@ model Post {
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
   comments  Comment[]
+  likes     Like[]
+
+  @@map("posts")
 }
 
 model Comment {
@@ -49,13 +55,26 @@ model Comment {
   post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId Int  @map("post_id")
 
-  // SetNull - Comments remain visible even if user is deleted
-  author   User? @relation(fields: [authorId], references: [id], onDelete: SetNull)
-  authorId Int?  @map("author_id")
-
-  guestName  String? @map("guest_name")
-  guestEmail String? @map("guest_email")
+  author   User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId Int  @map("author_id")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("comments")
+}
+
+model Like {
+  id Int @id @default(autoincrement())
+
+  userId Int @map("user_id")
+  postId Int @map("post_id")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([userId, postId])
+  @@map("likes")
 }

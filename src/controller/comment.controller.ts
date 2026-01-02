@@ -3,9 +3,9 @@ import { prisma } from '../lib/prisma';
 
 export const createComment: RequestHandler = async (req, res, next) => {
   try {
-    const userId = req.user?.id;
-    const postId = Number(req.params.postId) || null;
-    const { content, guestName, guestEmail } = req.body;
+    const userId = req.user!.id;
+    const postId = Number(req.params.postId);
+    const { content } = req.body;
 
     if (!postId || isNaN(postId) || postId <= 0) {
       return res.status(400).json({
@@ -13,12 +13,12 @@ export const createComment: RequestHandler = async (req, res, next) => {
       });
     }
 
-    // If not authenticated, guestName is required
-    if (!userId && !guestName) {
-      return res.status(400).json({
-        message: 'Name is required for guest comments',
-      });
-    }
+    // // If not authenticated, guestName is required
+    // if (!userId && !guestName) {
+    //   return res.status(400).json({
+    //     message: 'Name is required for guest comments',
+    //   });
+    // }
 
     // Check if post exists and is published
     const post = await prisma.post.findUnique({
@@ -43,17 +43,13 @@ export const createComment: RequestHandler = async (req, res, next) => {
       data: {
         content,
         postId,
-        ...(userId
-          ? { authorId: userId }
-          : { guestName, guestEmail: guestEmail || null }),
+        authorId: userId,
       },
       select: {
         id: true,
         content: true,
         createdAt: true,
-        author: userId
-          ? { select: { id: true, username: true, role: true } }
-          : undefined,
+        author: { select: { id: true, username: true, role: true } },
       },
     });
 

@@ -43,13 +43,13 @@ export const getAllPosts: RequestHandler = async (req, res, next) => {
           },
         },
         _count: {
-          select: { comments: true },
+          select: { comments: true, likes: true },
         },
       },
     });
 
     res.status(200).json({
-      posts,
+      posts: posts.map((post) => ({ ...post, likesCount: post._count.likes })),
       pagination: {
         page,
         limit,
@@ -102,13 +102,13 @@ export const getPostsByAuthor: RequestHandler = async (req, res, next) => {
         createdAt: true,
         updatedAt: true,
         _count: {
-          select: { comments: true },
+          select: { comments: true, likes: true },
         },
       },
     });
 
     res.status(200).json({
-      posts,
+      posts: posts.map((post) => ({ ...post, likesCount: post._count.likes })),
       pagination: {
         page,
         limit,
@@ -154,8 +154,6 @@ export const getPostById: RequestHandler = async (req, res, next) => {
             id: true,
             content: true,
             createdAt: true,
-            guestName: true,
-            guestEmail: true,
             author: {
               select: {
                 id: true,
@@ -165,6 +163,8 @@ export const getPostById: RequestHandler = async (req, res, next) => {
             },
           },
         },
+        _count: { select: { likes: true } },
+        likes: userId ? { where: { userId }, select: { id: true } } : false,
       },
     });
 
@@ -181,7 +181,13 @@ export const getPostById: RequestHandler = async (req, res, next) => {
       });
     }
 
-    res.status(200).json({ post });
+    res.status(200).json({
+      post: {
+        ...post,
+        likesCount: post._count.likes,
+        isLikedByCurrentUser: userId ? post.likes.length > 0 : false,
+      },
+    });
   } catch (error) {
     next(error);
   }
@@ -323,6 +329,73 @@ export const deletePost: RequestHandler = async (req, res, next) => {
     });
 
     res.sendStatus(204).end();
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const toggleLike: RequestHandler = async (req, res, next) => {
+  try {
+    const userId = req.user!.id;
+    const postId = Number(req.params.postId);
+
+    if (!postId || isNaN(postId)) {
+      return res.status(400).json({ message: 'Invalid post ID' });
+    }
+
+    const post = await prisma.post.findUnique({
+      where: { id: postId },
+      select: { id: true, published: true },
+    });
+
+    if (!post) {
+      return res.status(404).json({
+        message: 'Post not found',
+      });
+    }
+
+    if (!post.published) {
+      return res.status(403).json({
+        message: 'Cannot like an unpublished post',
+      });
+    }
+
+    // Check if already liked
+    const existingLike = await prisma.like.findUnique({
+      where: {
+        userId_postId: { userId, postId },
+      },
+    });
+
+    if (existingLike) {
+      // Unlike
+      await prisma.like.delete({
+        where: { id: existingLike.id },
+      });
+
+      const likesCount = await prisma.like.count({
+        where: { postId },
+      });
+
+      return res.status(200).json({
+        liked: false,
+        likes: likesCount,
+      });
+    }
+
+    // Like
+    await prisma.like.create({
+      data: { userId, postId },
+    });
+
+    const likesCount = await prisma.like.count({
+      where: { postId },
+    });
+
+    res.status(200).json({
+      liked: true,
+      likes: likesCount,
+    });
   } catch (error) {
     next(error);
   }

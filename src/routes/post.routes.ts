@@ -6,6 +6,7 @@ import {
   getAllPosts,
   getPostById,
   getPostsByAuthor,
+  toggleLike,
   updatePost,
 } from '../controller/post.controller';
 import {
@@ -41,12 +42,14 @@ router.post(
 );
 router.put('/:postId', requireLogin, validate(updatePostSchema), updatePost);
 router.delete('/:postId', requireLogin, deletePost);
+router.post('/:postId/like', requireLogin, toggleLike);
 
 // Comment routes
 router.post(
   '/:postId/comments',
   commentLimiter,
-  optionalAuth,
+  // optionalAuth,
+  requireLogin,
   validate(createCommentSchema),
   createComment
 );

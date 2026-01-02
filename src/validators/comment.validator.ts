@@ -8,14 +8,14 @@ export const createCommentSchema = z.object({
     .trim(),
 
   // For guest comments
-  guestName: z
-    .string()
-    .min(2, 'Name must be at least 2 characters')
-    .max(50, 'Name must be 50 characters or less')
-    .trim()
-    .optional(),
+  // guestName: z
+  //   .string()
+  //   .min(2, 'Name must be at least 2 characters')
+  //   .max(50, 'Name must be 50 characters or less')
+  //   .trim()
+  //   .optional(),
 
-  guestEmail: z.email('Invalid email').optional(),
+  // guestEmail: z.email('Invalid email').optional(),
 });
 
 export const updateCommentSchema = z.object({

@@ -22,6 +22,7 @@ async function main() {
   await prisma.comment.deleteMany();
   await prisma.post.deleteMany();
   await prisma.user.deleteMany();
+  await prisma.like.deleteMany();
 
   // 2. Create users
   const hashedPassword = await bcrypt.hash('123456', SALT_ROUNDS);
@@ -79,7 +80,7 @@ async function main() {
     }
   }
 
-  // 4. Create comments (any user can comment)
+  // 4. Create comments
   for (const post of posts) {
     for (let i = 0; i < COMMENTS_PER_POST; i++) {
       const randomUser = faker.helpers.arrayElement(users);
@@ -90,6 +91,15 @@ async function main() {
           postId: post.id,
           authorId: randomUser.id,
         },
+      });
+    }
+  }
+
+  // 5. Create likes
+  for (const post of posts) {
+    for (const user of users) {
+      await prisma.like.create({
+        data: { postId: post.id, userId: user.id },
       });
     }
   }
