@@ -128,6 +128,10 @@ export const getPostById: RequestHandler = async (req, res, next) => {
     const userId = req.user?.id;
     const postId = Number(req.params.postId);
 
+    console.log('Loader: ');
+    console.log('--------------');
+    console.log({ userId, postId });
+
     if (!postId || isNaN(postId)) {
       return res.status(400).json({ message: 'Invalid post ID' });
     }
@@ -181,11 +185,18 @@ export const getPostById: RequestHandler = async (req, res, next) => {
       });
     }
 
+    const isLikedByCurrentUser = userId
+      ? Array.isArray(post.likes) && post.likes.length > 0
+      : false;
+
+    console.log({ isLikedByCurrentUser });
+
     res.status(200).json({
       post: {
         ...post,
         likesCount: post._count.likes,
-        isLikedByCurrentUser: userId ? post.likes.length > 0 : false,
+        likes: undefined,
+        isLikedByCurrentUser,
       },
     });
   } catch (error) {
@@ -338,8 +349,13 @@ export const toggleLike: RequestHandler = async (req, res, next) => {
   try {
     const userId = req.user!.id;
     const postId = Number(req.params.postId);
+    const requestId = Number(req.body?.requestId);
 
-    if (!postId || isNaN(postId)) {
+    if (!Number.isInteger(requestId) || requestId < 1) {
+      return res.status(400).json({ message: 'Invalid request ID' });
+    }
+
+    if (!Number.isInteger(postId) || postId < 1) {
       return res.status(400).json({ message: 'Invalid post ID' });
     }
 
@@ -380,6 +396,7 @@ export const toggleLike: RequestHandler = async (req, res, next) => {
       return res.status(200).json({
         liked: false,
         likes: likesCount,
+        requestId,
       });
     }
 
@@ -395,6 +412,7 @@ export const toggleLike: RequestHandler = async (req, res, next) => {
     res.status(200).json({
       liked: true,
       likes: likesCount,
+      requestId,
     });
   } catch (error) {
     next(error);

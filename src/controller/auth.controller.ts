@@ -48,14 +48,14 @@ export const registerUser: RequestHandler = async (req, res, next) => {
     });
 
     // Auto-claim guest comments if email matches and keep guestName in case user is deleted
-    const claimedComments = await prisma.comment.updateMany({
-      where: { guestEmail: email, authorId: null },
-      data: {
-        authorId: newUser.id,
-        guestEmail: null,
-        // guestName: null,
-      },
-    });
+    // const claimedComments = await prisma.comment.updateMany({
+    //   where: { guestEmail: email, authorId: null },
+    //   data: {
+    //     authorId: newUser.id,
+    //     guestEmail: null,
+    //     // guestName: null,
+    //   },
+    // });
 
     // Generate token (auto-login after registration)
     const jwtPayload = { id: newUser.id, role: newUser.role };
@@ -70,7 +70,7 @@ export const registerUser: RequestHandler = async (req, res, next) => {
         email: newUser.email,
         role: newUser.role,
       },
-      claimedComments: claimedComments.count,
+      // claimedComments: claimedComments.count,
     });
   } catch (error) {
     next(error);
