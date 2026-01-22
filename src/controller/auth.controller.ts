@@ -2,7 +2,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { RequestHandler } from 'express';
 import { prisma } from '../lib/prisma';
-import { setTokenCookie, clearTokenCookie } from '../config/passport.config';
+import { setTokenCookie } from '../config/passport.config';
 
 export const registerUser: RequestHandler = async (req, res, next) => {
   try {
@@ -117,9 +117,4 @@ export const loginUser: RequestHandler = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
-};
-
-export const logoutUser: RequestHandler = (req, res) => {
-  clearTokenCookie(res);
-  res.status(200).json({ message: 'Logged out successfully' });
 };
