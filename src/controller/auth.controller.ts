@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { RequestHandler } from 'express';
 import { prisma } from '../lib/prisma';
+import { setTokenCookie, clearTokenCookie } from '../config/passport.config';
 
 export const registerUser: RequestHandler = async (req, res, next) => {
   try {
@@ -62,8 +63,10 @@ export const registerUser: RequestHandler = async (req, res, next) => {
     const secretKey = process.env.SECRET_KEY!;
     const token = jwt.sign(jwtPayload, secretKey, { expiresIn: '7d' });
 
+    // Set token in secure HTTP-only cookie
+    setTokenCookie(res, token);
+
     res.status(201).json({
-      token,
       user: {
         id: newUser.id,
         username: newUser.username,
@@ -100,8 +103,10 @@ export const loginUser: RequestHandler = async (req, res, next) => {
       expiresIn: '7d',
     });
 
+    // Set token in secure HTTP-only cookie
+    setTokenCookie(res, token);
+
     res.status(200).json({
-      token,
       user: {
         id: user.id,
         username: user.username,
@@ -112,4 +117,9 @@ export const loginUser: RequestHandler = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+};
+
+export const logoutUser: RequestHandler = (req, res) => {
+  clearTokenCookie(res);
+  res.status(200).json({ message: 'Logged out successfully' });
 };

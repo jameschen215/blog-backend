@@ -1,8 +1,44 @@
-import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
+import { Request, Response } from 'express';
+import { Strategy as JwtStrategy } from 'passport-jwt';
 import { prisma } from '../lib/prisma';
 
+/**
+ * Cookie configuration for JWT tokens
+ */
+export const cookieConfig = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'lax' as const,
+  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
+  path: '/',
+};
+
+/**
+ * Extract JWT from cookies
+ */
+function cookieExtractor(req: Request): string | null {
+  if (req && req.cookies && req.cookies.jwt) {
+    return req.cookies.jwt;
+  }
+  return null;
+}
+
+/**
+ * Set JWT token in secure HTTP-only cookie
+ */
+export function setTokenCookie(res: Response, token: string): void {
+  res.cookie('jwt', token, cookieConfig);
+}
+
+/**
+ * Clear JWT token cookie (for logout)
+ */
+export function clearTokenCookie(res: Response): void {
+  res.clearCookie('jwt', { path: '/' });
+}
+
 const opts = {
-  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+  jwtFromRequest: cookieExtractor,
   secretOrKey: process.env.SECRET_KEY!,
 };
 
@@ -15,7 +51,6 @@ export const jwtStrategy = new JwtStrategy(opts, async (payload, done) => {
         email: true,
         username: true,
         role: true,
-        // Do not include password
       },
     });
 
@@ -23,7 +58,6 @@ export const jwtStrategy = new JwtStrategy(opts, async (payload, done) => {
       return done(null, false);
     }
 
-    // Remove bcrypt comparison - JWT already verified!
     return done(null, user);
   } catch (error) {
     done(error);

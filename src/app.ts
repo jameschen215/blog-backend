@@ -4,6 +4,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import passport from 'passport';
+import cookieParser from 'cookie-parser';
 
 import authRoutes from './routes/auth.routes';
 import postRoutes from './routes/post.routes';
@@ -19,6 +20,7 @@ app.use(helmet());
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 // Apply general rate limiter to all routes
 app.use('/api', generalLimiter);

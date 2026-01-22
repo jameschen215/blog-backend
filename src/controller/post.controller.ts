@@ -75,6 +75,17 @@ export const getPostsByAuthor: RequestHandler = async (req, res, next) => {
       });
     }
 
+    const author = await prisma.user.findUnique({
+      where: { id: authorId },
+      select: { id: true, username: true },
+    });
+
+    if (!author) {
+      return res.status(404).json({
+        message: 'User not found',
+      });
+    }
+
     const page = Math.max(1, Number(req.query.page) || 1);
     const limit = Math.min(
       MAX_LIMIT,
@@ -101,6 +112,13 @@ export const getPostsByAuthor: RequestHandler = async (req, res, next) => {
         published: true,
         createdAt: true,
         updatedAt: true,
+        author: {
+          select: {
+            id: true,
+            username: true,
+            role: true,
+          },
+        },
         _count: {
           select: { comments: true, likes: true },
         },
@@ -108,6 +126,7 @@ export const getPostsByAuthor: RequestHandler = async (req, res, next) => {
     });
 
     res.status(200).json({
+      user: author,
       posts: posts.map((post) => ({ ...post, likesCount: post._count.likes })),
       pagination: {
         page,
@@ -168,6 +187,8 @@ export const getPostById: RequestHandler = async (req, res, next) => {
           },
         },
         _count: { select: { likes: true } },
+        // If userId exists, fetch this post’s likes made by that user only.
+        // If userId does NOT exist, don’t fetch the likes relation at all.
         likes: userId ? { where: { userId }, select: { id: true } } : false,
       },
     });
