@@ -6,7 +6,8 @@ import {
   getAllPosts,
   getPostById,
   getPostsByAuthor,
-  toggleLike,
+  // toggleLike,
+  toggleLikeSV,
   updatePost,
 } from '../controller/post.controller';
 import {
@@ -28,6 +29,18 @@ import { commentLimiter, postLimiter } from '../config/rage-limit.config';
 
 const router = Router();
 
+// Test route
+router.get('/test', requireLogin, (req, res) => {
+  console.log('All cookies:', req.cookies);
+  console.log('Token:', req.cookies.token);
+
+  if (!req.cookies.token) {
+    return res.status(401).json({ error: 'No token' });
+  }
+
+  res.send('Test success!');
+});
+
 // Post routes
 router.get('/', optionalAuth, getAllPosts);
 router.get('/author/:authorId', optionalAuth, getPostsByAuthor);
@@ -42,7 +55,7 @@ router.post(
 );
 router.put('/:postId', requireLogin, validate(updatePostSchema), updatePost);
 router.delete('/:postId', requireLogin, deletePost);
-router.post('/:postId/like', requireLogin, toggleLike);
+router.post('/:postId/like', requireLogin, toggleLikeSV);
 
 // Comment routes
 router.post(

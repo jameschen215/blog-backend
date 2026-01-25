@@ -2,7 +2,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { RequestHandler } from 'express';
 import { prisma } from '../lib/prisma';
-import { setTokenCookie } from '../config/passport.config';
+import { clearTokenCookie, setTokenCookie } from '../config/passport.config';
 
 export const registerUser: RequestHandler = async (req, res, next) => {
   try {
@@ -59,7 +59,12 @@ export const registerUser: RequestHandler = async (req, res, next) => {
     // });
 
     // Generate token (auto-login after registration)
-    const jwtPayload = { id: newUser.id, role: newUser.role };
+    const jwtPayload = {
+      id: newUser.id,
+      username: newUser.username,
+      email: newUser.email,
+      role: newUser.role,
+    };
     const secretKey = process.env.SECRET_KEY!;
     const token = jwt.sign(jwtPayload, secretKey, { expiresIn: '7d' });
 
@@ -99,9 +104,18 @@ export const loginUser: RequestHandler = async (req, res, next) => {
 
     const secretKey = process.env.SECRET_KEY!;
     // Include role for authorization
-    const token = jwt.sign({ id: user.id, role: user.role }, secretKey, {
-      expiresIn: '7d',
-    });
+    const token = jwt.sign(
+      {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+      },
+      secretKey,
+      {
+        expiresIn: '7d',
+      }
+    );
 
     // Set token in secure HTTP-only cookie
     setTokenCookie(res, token);
@@ -114,6 +128,16 @@ export const loginUser: RequestHandler = async (req, res, next) => {
         role: user.role,
       },
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const logoutUser: RequestHandler = async (_req, res, next) => {
+  try {
+    clearTokenCookie(res);
+
+    res.status(200).json({ success: true });
   } catch (error) {
     next(error);
   }

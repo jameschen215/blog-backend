@@ -7,9 +7,8 @@ import { prisma } from '../lib/prisma';
  */
 export const cookieConfig = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: 'lax' as const,
-  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
+  secure: false, // true in production with HTTPS
+  sameSite: 'lax' as const, // or 'none' if using secure: true
   path: '/',
 };
 
@@ -34,7 +33,7 @@ export function setTokenCookie(res: Response, token: string): void {
  * Clear JWT token cookie (for logout)
  */
 export function clearTokenCookie(res: Response): void {
-  res.clearCookie('jwt', { path: '/' });
+  res.clearCookie('jwt', cookieConfig);
 }
 
 const opts = {
@@ -60,6 +59,6 @@ export const jwtStrategy = new JwtStrategy(opts, async (payload, done) => {
 
     return done(null, user);
   } catch (error) {
-    done(error);
+    return done(error, false);
   }
 });

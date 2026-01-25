@@ -1,7 +1,7 @@
 import { RequestHandler } from 'express';
 import { prisma } from '../lib/prisma';
 
-const DEFAULT_LIMIT = 10;
+const DEFAULT_LIMIT = 5;
 const MAX_LIMIT = 50;
 
 export const getAllPosts: RequestHandler = async (req, res, next) => {
@@ -146,10 +146,6 @@ export const getPostById: RequestHandler = async (req, res, next) => {
   try {
     const userId = req.user?.id;
     const postId = Number(req.params.postId);
-
-    console.log('Loader: ');
-    console.log('--------------');
-    console.log({ userId, postId });
 
     if (!postId || isNaN(postId)) {
       return res.status(400).json({ message: 'Invalid post ID' });
@@ -434,6 +430,73 @@ export const toggleLike: RequestHandler = async (req, res, next) => {
       liked: true,
       likes: likesCount,
       requestId,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const toggleLikeSV: RequestHandler = async (req, res, next) => {
+  try {
+    const userId = req.user!.id;
+    const postId = Number(req.params.postId);
+
+    if (!Number.isInteger(postId) || postId < 1) {
+      return res.status(400).json({ message: 'Invalid post ID' });
+    }
+
+    const post = await prisma.post.findUnique({
+      where: { id: postId },
+      select: { id: true, published: true },
+    });
+
+    if (!post) {
+      return res.status(404).json({
+        message: 'Post not found',
+      });
+    }
+
+    if (!post.published) {
+      return res.status(403).json({
+        message: 'Cannot like an unpublished post',
+      });
+    }
+
+    // Check if already liked
+    const existingLike = await prisma.like.findUnique({
+      where: {
+        userId_postId: { userId, postId },
+      },
+    });
+
+    if (existingLike) {
+      // Unlike
+      await prisma.like.delete({
+        where: { id: existingLike.id },
+      });
+
+      const likesCount = await prisma.like.count({
+        where: { postId },
+      });
+
+      return res.status(200).json({
+        liked: false,
+        likes: likesCount,
+      });
+    }
+
+    // Like
+    await prisma.like.create({
+      data: { userId, postId },
+    });
+
+    const likesCount = await prisma.like.count({
+      where: { postId },
+    });
+
+    res.status(200).json({
+      liked: true,
+      likes: likesCount,
     });
   } catch (error) {
     next(error);
