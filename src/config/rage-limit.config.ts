@@ -36,6 +36,15 @@ export const postLimiter = rateLimit({
   legacyHeaders: false,
 });
 
+// Post like rate limiter - 5 likes per minute
+export const postLikeLimiter = rateLimit({
+  windowMs: 1000 * 60,
+  max: 5,
+  message: {
+    message: 'Like the post too often, please try later',
+  },
+});
+
 // Comment creation rate limiter - 10 comments per hour
 export const commentLimiter = rateLimit({
   windowMs: 1000 * 60 * 60,

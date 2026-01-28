@@ -6,8 +6,9 @@ import {
   getAllPosts,
   getPostById,
   getPostsByAuthor,
-  // toggleLike,
-  toggleLikeSV,
+  toggleLike,
+  // toggleLikeRC,
+  // toggleLikeSV,
   updatePost,
 } from '../controller/post.controller';
 import {
@@ -25,7 +26,11 @@ import {
   deleteComment,
   updateComment,
 } from '../controller/comment.controller';
-import { commentLimiter, postLimiter } from '../config/rage-limit.config';
+import {
+  commentLimiter,
+  postLikeLimiter,
+  postLimiter,
+} from '../config/rage-limit.config';
 
 const router = Router();
 
@@ -55,7 +60,7 @@ router.post(
 );
 router.put('/:postId', requireLogin, validate(updatePostSchema), updatePost);
 router.delete('/:postId', requireLogin, deletePost);
-router.post('/:postId/like', requireLogin, toggleLikeSV);
+router.post('/:postId/like', requireLogin, postLikeLimiter, toggleLike);
 
 // Comment routes
 router.post(

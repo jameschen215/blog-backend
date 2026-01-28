@@ -1,5 +1,6 @@
 import { RequestHandler } from 'express';
 import { prisma } from '../lib/prisma';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client';
 
 const DEFAULT_LIMIT = 5;
 const MAX_LIMIT = 50;
@@ -207,6 +208,7 @@ export const getPostById: RequestHandler = async (req, res, next) => {
       : false;
 
     console.log({ isLikedByCurrentUser });
+    console.log({ likes: post._count.likes });
 
     res.status(200).json({
       post: {
@@ -366,6 +368,95 @@ export const toggleLike: RequestHandler = async (req, res, next) => {
   try {
     const userId = req.user!.id;
     const postId = Number(req.params.postId);
+
+    let liked = false;
+
+    if (!Number.isInteger(postId) || postId < 1) {
+      return res.status(400).json({ message: 'Invalid post ID' });
+    }
+
+    const post = await prisma.post.findUnique({
+      where: { id: postId },
+      select: { id: true, published: true },
+    });
+
+    if (!post) {
+      return res.status(404).json({
+        message: 'Post not found',
+      });
+    }
+
+    if (!post.published) {
+      return res.status(403).json({
+        message: 'Cannot like an unpublished post',
+      });
+    }
+
+    // Check if already liked
+    const existingLike = await prisma.like.findUnique({
+      where: {
+        userId_postId: { userId, postId },
+      },
+    });
+
+    if (existingLike) {
+      try {
+        // Unlike
+        await prisma.like.delete({
+          where: { id: existingLike.id },
+        });
+
+        liked = false;
+      } catch (error) {
+        if (
+          error instanceof PrismaClientKnownRequestError &&
+          error.code === 'P2025'
+        ) {
+          // Race condition: like was already deleted by another request
+          liked = false;
+        } else {
+          throw error;
+        }
+      }
+    } else {
+      try {
+        // Like
+        await prisma.like.create({
+          data: { userId, postId },
+        });
+        liked = true;
+      } catch (error) {
+        // If unique constraint fails, it means another request already created it
+        if (
+          error instanceof PrismaClientKnownRequestError &&
+          error.code === 'P2002'
+        ) {
+          // Treat this as success - the like exists now
+          liked = true;
+        } else {
+          throw error; // Re-throw other errors
+        }
+      }
+    }
+
+    // Get final count
+    const likesCount = await prisma.like.count({
+      where: { postId },
+    });
+
+    res.status(200).json({
+      liked,
+      likes: likesCount,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const toggleLikeRC: RequestHandler = async (req, res, next) => {
+  try {
+    const userId = req.user!.id;
+    const postId = Number(req.params.postId);
     const requestId = Number(req.body?.requestId);
 
     if (!Number.isInteger(requestId) || requestId < 1) {
@@ -393,110 +484,49 @@ export const toggleLike: RequestHandler = async (req, res, next) => {
       });
     }
 
-    // Check if already liked
-    const existingLike = await prisma.like.findUnique({
-      where: {
-        userId_postId: { userId, postId },
-      },
-    });
-
-    if (existingLike) {
-      // Unlike
-      await prisma.like.delete({
-        where: { id: existingLike.id },
+    const result = await prisma.$transaction(async (tx) => {
+      const existingLike = await tx.like.findUnique({
+        where: { userId_postId: { userId, postId } },
       });
 
-      const likesCount = await prisma.like.count({
+      let liked: boolean;
+
+      if (existingLike) {
+        await tx.like.delete({
+          where: { id: existingLike.id },
+        });
+
+        liked = false;
+      } else {
+        try {
+          await tx.like.create({
+            data: { userId, postId },
+          });
+
+          liked = true;
+        } catch (error) {
+          if (
+            error instanceof PrismaClientKnownRequestError &&
+            error.code === 'P2002'
+          ) {
+            liked = true;
+          } else {
+            throw error;
+          }
+        }
+      }
+
+      const likesCount = await tx.like.count({
         where: { postId },
       });
 
-      return res.status(200).json({
-        liked: false,
-        likes: likesCount,
-        requestId,
-      });
-    }
-
-    // Like
-    await prisma.like.create({
-      data: { userId, postId },
-    });
-
-    const likesCount = await prisma.like.count({
-      where: { postId },
+      return { liked, likesCount };
     });
 
     res.status(200).json({
-      liked: true,
-      likes: likesCount,
+      liked: result.liked,
+      likes: result.likesCount,
       requestId,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const toggleLikeSV: RequestHandler = async (req, res, next) => {
-  try {
-    const userId = req.user!.id;
-    const postId = Number(req.params.postId);
-
-    if (!Number.isInteger(postId) || postId < 1) {
-      return res.status(400).json({ message: 'Invalid post ID' });
-    }
-
-    const post = await prisma.post.findUnique({
-      where: { id: postId },
-      select: { id: true, published: true },
-    });
-
-    if (!post) {
-      return res.status(404).json({
-        message: 'Post not found',
-      });
-    }
-
-    if (!post.published) {
-      return res.status(403).json({
-        message: 'Cannot like an unpublished post',
-      });
-    }
-
-    // Check if already liked
-    const existingLike = await prisma.like.findUnique({
-      where: {
-        userId_postId: { userId, postId },
-      },
-    });
-
-    if (existingLike) {
-      // Unlike
-      await prisma.like.delete({
-        where: { id: existingLike.id },
-      });
-
-      const likesCount = await prisma.like.count({
-        where: { postId },
-      });
-
-      return res.status(200).json({
-        liked: false,
-        likes: likesCount,
-      });
-    }
-
-    // Like
-    await prisma.like.create({
-      data: { userId, postId },
-    });
-
-    const likesCount = await prisma.like.count({
-      where: { postId },
-    });
-
-    res.status(200).json({
-      liked: true,
-      likes: likesCount,
     });
   } catch (error) {
     next(error);
