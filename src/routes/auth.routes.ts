@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { validate } from '../middleware/validate';
-import { authLimiter } from '../config/rage-limit.config';
+import { authLimiter } from '../config/rate-limit.config';
 import {
   loginUser,
   logoutUser,

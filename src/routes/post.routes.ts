@@ -30,7 +30,7 @@ import {
   commentLimiter,
   postLikeLimiter,
   postLimiter,
-} from '../config/rage-limit.config';
+} from '../config/rate-limit.config';
 
 const router = Router();
 
@@ -48,7 +48,7 @@ router.get('/test', requireLogin, (req, res) => {
 
 // Post routes
 router.get('/', optionalAuth, getAllPosts);
-router.get('/author/:authorId', optionalAuth, getPostsByAuthor);
+router.get('/authors/:authorId', optionalAuth, getPostsByAuthor);
 router.get('/:postId', optionalAuth, getPostById);
 
 router.post(

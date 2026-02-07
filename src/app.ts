@@ -10,7 +10,7 @@ import authRoutes from './routes/auth.routes';
 import postRoutes from './routes/post.routes';
 import { jwtStrategy } from './config/passport.config';
 import { errorHandler } from './middleware/error-handler';
-import { generalLimiter } from './config/rage-limit.config';
+import { generalLimiter } from './config/rate-limit.config';
 
 const app = express();
 
