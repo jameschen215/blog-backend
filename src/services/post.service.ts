@@ -1,6 +1,7 @@
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client';
 import { prisma } from '../lib/prisma';
 import { buildPaginationMeta, Pagination } from '../lib/pagination';
+import { mapPostDetail, mapPostList } from '../lib/mappers';
 import {
   postDetailSelect,
   postListSelect,
@@ -36,7 +37,7 @@ export async function getAllPostsService(params: {
   });
 
   return {
-    posts: posts.map((post) => ({ ...post, likesCount: post._count.likes })),
+    posts: posts.map(mapPostList),
     pagination: buildPaginationMeta({ page, limit, total }),
   };
 }
@@ -74,7 +75,7 @@ export async function getPostsByAuthorService(params: {
 
   return {
     user: author,
-    posts: posts.map((post) => ({ ...post, likesCount: post._count.likes })),
+    posts: posts.map(mapPostList),
     pagination: buildPaginationMeta({ page, limit, total }),
   };
 }
@@ -98,17 +99,8 @@ export async function getPostByIdService(params: {
     throw createHttpError(403, 'The post is not published');
   }
 
-  const isLikedByCurrentUser = userId
-    ? Array.isArray(post.likes) && post.likes.length > 0
-    : false;
-
   return {
-    post: {
-      ...post,
-      likesCount: post._count.likes,
-      likes: undefined,
-      isLikedByCurrentUser,
-    },
+    post: mapPostDetail(post),
   };
 }
 
