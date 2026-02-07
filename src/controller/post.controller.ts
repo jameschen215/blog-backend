@@ -207,9 +207,6 @@ export const getPostById: RequestHandler = async (req, res, next) => {
       ? Array.isArray(post.likes) && post.likes.length > 0
       : false;
 
-    console.log({ isLikedByCurrentUser });
-    console.log({ likes: post._count.likes });
-
     res.status(200).json({
       post: {
         ...post,
@@ -269,8 +266,6 @@ export const updatePost: RequestHandler = async (req, res, next) => {
         message: 'Invalid post ID',
       });
     }
-    console.log({ published });
-
     // Check if at least one field is provided - be careful for boolean value false
     if (!title && !content && published === undefined) {
       return res.status(400).json({

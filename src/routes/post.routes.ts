@@ -34,18 +34,6 @@ import {
 
 const router = Router();
 
-// Test route
-router.get('/test', requireLogin, (req, res) => {
-  console.log('All cookies:', req.cookies);
-  console.log('Token:', req.cookies.token);
-
-  if (!req.cookies.token) {
-    return res.status(401).json({ error: 'No token' });
-  }
-
-  res.send('Test success!');
-});
-
 // Post routes
 router.get('/', optionalAuth, getAllPosts);
 router.get('/authors/:authorId', optionalAuth, getPostsByAuthor);
