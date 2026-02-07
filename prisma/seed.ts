@@ -18,6 +18,10 @@ const COMMENTS_PER_POST = getRandomInt({ min: 3, max: 5 });
 console.log({ USERS_COUNT, POSTS_PER_USER, COMMENTS_PER_POST });
 
 async function main() {
+  if (process.env.NODE_ENV !== 'development') {
+    throw new Error('Seeding is only allowed in development environment');
+  }
+
   // 1. Clean database (dev only)
   await prisma.comment.deleteMany();
   await prisma.post.deleteMany();

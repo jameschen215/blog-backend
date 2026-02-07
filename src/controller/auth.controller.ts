@@ -6,7 +6,7 @@ import { clearTokenCookie, setTokenCookie } from '../config/passport.config';
 
 export const registerUser: RequestHandler = async (req, res, next) => {
   try {
-    const { email, username, password, role } = req.body;
+    const { email, username, password } = req.body;
 
     // Check if user already exists
     const existingUser = await prisma.user.findFirst({
@@ -37,7 +37,7 @@ export const registerUser: RequestHandler = async (req, res, next) => {
         email,
         username,
         password: hashedPassword,
-        role: role || 'USER',
+        role: 'USER',
       },
       select: {
         id: true,
