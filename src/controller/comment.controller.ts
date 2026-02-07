@@ -1,5 +1,9 @@
 import { RequestHandler } from 'express';
-import { prisma } from '../lib/prisma';
+import {
+  createCommentService,
+  deleteCommentService,
+  updateCommentService,
+} from '../services/comment.service';
 
 export const createComment: RequestHandler = async (req, res, next) => {
   try {
@@ -20,42 +24,8 @@ export const createComment: RequestHandler = async (req, res, next) => {
     //   });
     // }
 
-    // Check if post exists and is published
-    const post = await prisma.post.findUnique({
-      where: { id: postId },
-      select: { id: true, published: true },
-    });
-
-    if (!post) {
-      return res.status(404).json({
-        message: 'Post not found',
-      });
-    }
-
-    if (!post.published) {
-      return res.status(403).json({
-        message: 'Cannot comment on unpublished posts',
-      });
-    }
-
-    // Create comment
-    const comment = await prisma.comment.create({
-      data: {
-        content,
-        postId,
-        authorId: userId,
-      },
-      select: {
-        id: true,
-        content: true,
-        createdAt: true,
-        author: { select: { id: true, username: true, role: true } },
-      },
-    });
-
-    return res.status(201).json({
-      comment,
-    });
+    const result = await createCommentService({ userId, postId, content });
+    return res.status(201).json(result);
   } catch (error) {
     next(error);
   }
@@ -67,37 +37,8 @@ export const updateComment: RequestHandler = async (req, res, next) => {
     const commentId = Number(req.params.commentId);
     const { content } = req.body;
 
-    const comment = await prisma.comment.findUnique({
-      where: { id: commentId },
-    });
-
-    if (!comment) {
-      return res.status(404).json({
-        message: 'Comment not found',
-      });
-    }
-
-    // Only the author can update (no guest edits)
-    if (comment.authorId !== userId) {
-      return res.status(403).json({
-        message: 'You can only edit your own comments',
-      });
-    }
-
-    const updatedComment = await prisma.comment.update({
-      where: { id: commentId },
-      data: { content },
-      select: {
-        id: true,
-        content: true,
-        createdAt: true,
-        author: { select: { id: true, username: true, role: true } },
-      },
-    });
-
-    res.status(200).json({
-      comment: updatedComment,
-    });
+    const result = await updateCommentService({ userId, commentId, content });
+    res.status(200).json(result);
   } catch (error) {
     next(error);
   }
@@ -114,23 +55,7 @@ export const deleteComment: RequestHandler = async (req, res, next) => {
       });
     }
 
-    const comment = await prisma.comment.findUnique({
-      where: { id: commentId },
-    });
-
-    if (!comment) {
-      return res.status(404).json({
-        message: 'Comment not found',
-      });
-    }
-
-    if (comment.authorId !== userId) {
-      return res.status(403).json({
-        message: 'You can only delete your own comments',
-      });
-    }
-
-    await prisma.comment.delete({ where: { id: commentId } });
+    await deleteCommentService({ userId, commentId });
 
     res.sendStatus(204).end();
   } catch (error) {
