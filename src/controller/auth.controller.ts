@@ -1,6 +1,9 @@
 import { RequestHandler } from 'express';
 import { clearTokenCookie, setTokenCookie } from '../config/passport.config';
-import { loginUserService, registerUserService } from '../services/auth.service';
+import {
+  loginUserService,
+  registerUserService,
+} from '../services/auth.service';
 
 export const registerUser: RequestHandler = async (req, res, next) => {
   try {
