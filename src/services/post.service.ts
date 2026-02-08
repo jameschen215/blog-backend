@@ -2,19 +2,12 @@ import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client';
 import { prisma } from '../lib/prisma';
 import { buildPaginationMeta, Pagination } from '../lib/pagination';
 import { mapPostDetail, mapPostList } from '../lib/mappers';
+import { createAPIError } from '../lib/api-error';
 import {
   postDetailSelect,
   postListSelect,
   postWriteSelect,
 } from '../lib/selects';
-
-type HttpError = Error & { statusCode?: number };
-
-function createHttpError(statusCode: number, message: string): HttpError {
-  const error = new Error(message) as HttpError;
-  error.statusCode = statusCode;
-  return error;
-}
 
 export async function getAllPostsService(params: {
   userId?: number;
@@ -56,7 +49,7 @@ export async function getPostsByAuthorService(params: {
   });
 
   if (!author) {
-    throw createHttpError(404, 'User not found');
+    throw createAPIError(404, 'User not found');
   }
 
   const where = {
@@ -92,11 +85,11 @@ export async function getPostByIdService(params: {
   });
 
   if (!post) {
-    throw createHttpError(404, 'Post not found');
+    throw createAPIError(404, 'Post not found');
   }
 
   if (!post.published && post.author.id !== userId) {
-    throw createHttpError(403, 'The post is not published');
+    throw createAPIError(403, 'The post is not published');
   }
 
   return {
@@ -137,11 +130,11 @@ export async function updatePostService(params: {
   });
 
   if (!existingPost) {
-    throw createHttpError(404, 'Post not found');
+    throw createAPIError(404, 'Post not found');
   }
 
   if (existingPost.authorId !== userId) {
-    throw createHttpError(403, "Cannot update other people's posts");
+    throw createAPIError(403, "Cannot update other people's posts");
   }
 
   const post = await prisma.post.update({
@@ -164,11 +157,11 @@ export async function deletePostService(params: {
   });
 
   if (!existingPost) {
-    throw createHttpError(404, 'Post not found');
+    throw createAPIError(404, 'Post not found');
   }
 
   if (existingPost.authorId !== userId) {
-    throw createHttpError(403, "Cannot delete other people's posts");
+    throw createAPIError(403, "Cannot delete other people's posts");
   }
 
   await prisma.post.delete({
@@ -189,11 +182,11 @@ export async function toggleLikeService(params: {
   });
 
   if (!post) {
-    throw createHttpError(404, 'Post not found');
+    throw createAPIError(404, 'Post not found');
   }
 
   if (!post.published) {
-    throw createHttpError(403, 'Cannot like an unpublished post');
+    throw createAPIError(403, 'Cannot like an unpublished post');
   }
 
   const existingLike = await prisma.like.findUnique({
@@ -260,11 +253,11 @@ export async function toggleLikeRcService(params: {
   });
 
   if (!post) {
-    throw createHttpError(404, 'Post not found');
+    throw createAPIError(404, 'Post not found');
   }
 
   if (!post.published) {
-    throw createHttpError(403, 'Cannot like an unpublished post');
+    throw createAPIError(403, 'Cannot like an unpublished post');
   }
 
   const result = await prisma.$transaction(async (tx) => {

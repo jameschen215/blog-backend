@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../lib/prisma';
+import { createAPIError } from '../lib/api-error';
 
 type RegisterInput = {
   email: string;
@@ -13,14 +14,6 @@ type LoginInput = {
   password: string;
 };
 
-type HttpError = Error & { statusCode?: number };
-
-function createHttpError(statusCode: number, message: string): HttpError {
-  const error = new Error(message) as HttpError;
-  error.statusCode = statusCode;
-  return error;
-}
-
 export async function registerUserService(input: RegisterInput) {
   const { email, username, password } = input;
 
@@ -30,11 +23,11 @@ export async function registerUserService(input: RegisterInput) {
 
   if (existingUser) {
     if (existingUser.email === email) {
-      throw createHttpError(409, 'Email already registered');
+      throw createAPIError(409, 'Email already registered');
     }
 
     if (existingUser.username === username) {
-      throw createHttpError(409, 'Username already taken');
+      throw createAPIError(409, 'Username already taken');
     }
   }
 
@@ -80,12 +73,12 @@ export async function loginUserService(input: LoginInput) {
   });
 
   if (!user) {
-    throw createHttpError(401, 'Invalid credentials');
+    throw createAPIError(401, 'Invalid credentials');
   }
 
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) {
-    throw createHttpError(401, 'Invalid credentials');
+    throw createAPIError(401, 'Invalid credentials');
   }
 
   const secretKey = process.env.SECRET_KEY!;
