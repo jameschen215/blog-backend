@@ -1,7 +1,6 @@
 import { ZodError } from 'zod';
 import { ErrorRequestHandler } from 'express';
 import { Prisma } from '../generated/prisma/client';
-import { APIError } from '../lib/api-error';
 
 export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
   // 1. Prisma errors
@@ -64,15 +63,6 @@ export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
   if (err.name === 'TokenExpiredError') {
     return res.status(401).json({
       message: 'Token expired',
-    });
-  }
-
-  // 5. API errors
-  if (err instanceof APIError) {
-    return res.status(err.status ?? 500).json({
-      message: err.message,
-      ...(err.fieldErrors && { errors: err.fieldErrors }),
-      ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
     });
   }
 
