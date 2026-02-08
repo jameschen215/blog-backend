@@ -1,6 +1,7 @@
 import { ZodError } from 'zod';
 import { ErrorRequestHandler } from 'express';
 import { Prisma } from '../generated/prisma/client';
+import { APIError } from '../lib/api-error';
 
 export const errorHandler: ErrorRequestHandler = (err, _req, res) => {
   console.error('Error: ', err);
@@ -68,8 +69,17 @@ export const errorHandler: ErrorRequestHandler = (err, _req, res) => {
     });
   }
 
+  // 5. API errors
+  if (err instanceof APIError) {
+    return res.status(err.status ?? 500).json({
+      message: err.message,
+      ...(err.fieldErrors && { errors: err.fieldErrors }),
+      ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
+    });
+  }
+
   // 5. Default error
-  const statusCode = err.statusCode || 500;
+  const statusCode = err.status ?? err.statusCode ?? 500;
   const message = err.message || 'Internal server error';
 
   res.status(statusCode).json({
