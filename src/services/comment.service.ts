@@ -1,6 +1,6 @@
 import { prisma } from '../lib/prisma';
 import { commentSelect } from '../lib/selects';
-import { createAPIError } from '../lib/api-error';
+import { APIError } from '../lib/api-error';
 
 export async function createCommentService(params: {
   userId: number;
@@ -15,11 +15,11 @@ export async function createCommentService(params: {
   });
 
   if (!post) {
-    throw createAPIError(404, 'Post not found');
+    throw new APIError('Post not found', 404);
   }
 
   if (!post.published) {
-    throw createAPIError(403, 'Cannot comment on unpublished posts');
+    throw new APIError('Cannot comment on unpublished posts', 403);
   }
 
   const comment = await prisma.comment.create({
@@ -46,11 +46,11 @@ export async function updateCommentService(params: {
   });
 
   if (!comment) {
-    throw createAPIError(404, 'Comment not found');
+    throw new APIError('Comment not found', 404);
   }
 
   if (comment.authorId !== userId) {
-    throw createAPIError(403, 'You can only edit your own comments');
+    throw new APIError('You can only edit your own comments', 403);
   }
 
   const updatedComment = await prisma.comment.update({
@@ -73,11 +73,11 @@ export async function deleteCommentService(params: {
   });
 
   if (!comment) {
-    throw createAPIError(404, 'Comment not found');
+    throw new APIError('Comment not found', 404);
   }
 
   if (comment.authorId !== userId) {
-    throw createAPIError(403, 'You can only delete your own comments');
+    throw new APIError('You can only delete your own comments', 403);
   }
 
   await prisma.comment.delete({ where: { id: commentId } });

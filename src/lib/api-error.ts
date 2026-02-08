@@ -1,13 +1,19 @@
 export class APIError extends Error {
-  statusCode: number;
+  status?: number;
+  response?: Response;
+  fieldErrors?: Record<string, string[]>;
 
-  constructor(statusCode: number, message: string) {
+  constructor(
+    message: string,
+    status?: number,
+    response?: Response,
+    fieldErrors?: Record<string, string[]>
+  ) {
     super(message);
-    this.name = 'APIError';
-    this.statusCode = statusCode;
-  }
-}
 
-export function createAPIError(statusCode: number, message: string): APIError {
-  return new APIError(statusCode, message);
+    this.name = 'APIError';
+    this.status = status;
+    this.response = response;
+    this.fieldErrors = fieldErrors;
+  }
 }
