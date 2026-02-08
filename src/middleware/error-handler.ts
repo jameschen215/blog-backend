@@ -3,9 +3,7 @@ import { ErrorRequestHandler } from 'express';
 import { Prisma } from '../generated/prisma/client';
 import { APIError } from '../lib/api-error';
 
-export const errorHandler: ErrorRequestHandler = (err, _req, res) => {
-  console.error('Error: ', err);
-
+export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
   // 1. Prisma errors
   if (err instanceof Prisma.PrismaClientKnownRequestError) {
     // Unique constraint violation
