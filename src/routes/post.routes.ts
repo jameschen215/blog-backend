@@ -7,6 +7,7 @@ import {
   getPostById,
   getPostsByAuthor,
   toggleLike,
+  togglePublish,
   // toggleLikeRC,
   // toggleLikeSV,
   updatePost,

@@ -305,14 +305,9 @@ export async function toggleLikeRcService(params: {
     requestId,
   };
 }
-export async function togglePublishService(params: {
-  userId: number;
-  postId: number;
-}) {
-  const { userId, postId } = params;
-
+export async function togglePublishService(postId: number) {
   const post = await prisma.post.findUnique({
-    where: { id: postId, userId },
+    where: { id: postId },
     select: { id: true, published: true },
   });
 
