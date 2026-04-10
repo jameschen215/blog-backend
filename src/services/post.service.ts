@@ -60,7 +60,7 @@ export async function getPostsByAuthorService(params: {
   const total = await prisma.post.count({ where });
   const posts = await prisma.post.findMany({
     where,
-    orderBy: { createdAt: 'desc' },
+    orderBy: [{ published: 'desc' }, { updatedAt: 'desc' }, { title: 'asc' }],
     skip,
     take: limit,
     select: postListSelect,
