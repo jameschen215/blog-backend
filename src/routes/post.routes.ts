@@ -49,6 +49,7 @@ router.post(
 router.put('/:postId', requireLogin, validate(updatePostSchema), updatePost);
 router.delete('/:postId', requireLogin, deletePost);
 router.post('/:postId/like', requireLogin, postLikeLimiter, toggleLike);
+router.post('/:postId/publish', requireLogin, togglePublish);
 
 // Comment routes
 router.post(

@@ -305,3 +305,27 @@ export async function toggleLikeRcService(params: {
     requestId,
   };
 }
+export async function togglePublishService(params: {
+  userId: number;
+  postId: number;
+}) {
+  const { userId, postId } = params;
+
+  const post = await prisma.post.findUnique({
+    where: { id: postId, userId },
+    select: { id: true, published: true },
+  });
+
+  if (!post) {
+    throw new APIError('Post not found', 404);
+  }
+
+  const result = await prisma.post.update({
+    where: { id: postId },
+    data: { published: !post.published },
+  });
+
+  return {
+    published: result.published,
+  };
+}

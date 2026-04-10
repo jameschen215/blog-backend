@@ -8,6 +8,7 @@ import {
   getPostsByAuthorService,
   toggleLikeRcService,
   toggleLikeService,
+  togglePublishService,
   updatePostService,
 } from '../services/post.service';
 
@@ -164,6 +165,23 @@ export const toggleLikeRC: RequestHandler = async (req, res, next) => {
     }
     const result = await toggleLikeRcService({ userId, postId, requestId });
     res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const togglePublish: RequestHandler = async (req, res, next) => {
+  try {
+    const userId = req.user!.id;
+    const postId = parseInt(req.params.postId);
+
+    if (isNaN(postId) || postId < 1) {
+      return res.status(400).json({ message: 'Invalid post ID' });
+    }
+
+    const result = await togglePublishService({ userId, postId });
+
+    return res.status(200).json(result);
   } catch (error) {
     next(error);
   }
