@@ -35,11 +35,9 @@ export const getPostsByAuthor: RequestHandler = async (req, res, next) => {
       });
     }
 
-    const pagination = getPagination(req.query);
     const result = await getPostsByAuthorService({
       authorId,
       userId,
-      pagination,
     });
 
     res.status(200).json(result);

@@ -38,10 +38,8 @@ export async function getAllPostsService(params: {
 export async function getPostsByAuthorService(params: {
   authorId: number;
   userId?: number;
-  pagination: Pagination;
 }) {
-  const { authorId, userId, pagination } = params;
-  const { page, limit, skip } = pagination;
+  const { authorId, userId } = params;
 
   const author = await prisma.user.findUnique({
     where: { id: authorId },
@@ -57,19 +55,15 @@ export async function getPostsByAuthorService(params: {
     ...(userId === authorId ? {} : { published: true }),
   };
 
-  const total = await prisma.post.count({ where });
   const posts = await prisma.post.findMany({
     where,
     orderBy: [{ published: 'desc' }, { updatedAt: 'desc' }, { title: 'asc' }],
-    skip,
-    take: limit,
     select: postListSelect,
   });
 
   return {
     user: author,
     posts: posts.map(mapPostList),
-    pagination: buildPaginationMeta({ page, limit, total }),
   };
 }
 
