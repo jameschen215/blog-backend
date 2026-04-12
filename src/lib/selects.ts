@@ -29,6 +29,9 @@ export const postWriteSelect = {
   author: {
     select: userSelect,
   },
+  _count: {
+    select: { comments: true, likes: true },
+  },
 } as const;
 
 export const commentSelect = {
