@@ -80,6 +80,7 @@ export function mapPostDetail(post: PostDetailShape) {
     author: mapUser(post.author),
     comments: post.comments.map(mapComment),
     likesCount: post._count.likes,
+    commentsCount: post.comments.length,
     isLikedByCurrentUser,
   };
 }
