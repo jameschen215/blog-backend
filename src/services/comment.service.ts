@@ -70,13 +70,15 @@ export async function deleteCommentService(params: {
 
   const comment = await prisma.comment.findUnique({
     where: { id: commentId },
+    include: { post: { select: { authorId: true } } },
   });
 
   if (!comment) {
     throw new APIError('Comment not found', 404);
   }
 
-  if (comment.authorId !== userId) {
+  // Allow comment author OR post author to delete
+  if (comment.authorId !== userId && comment.post.authorId !== userId) {
     throw new APIError('You can only delete your own comments', 403);
   }
 
