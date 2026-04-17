@@ -37,6 +37,7 @@ const router = Router();
 
 // Post routes
 router.get('/', optionalAuth, getAllPosts);
+router.get('/me', requireLogin, getPostsByAuthor);
 router.get('/authors/:authorId', optionalAuth, getPostsByAuthor);
 router.get('/:postId', optionalAuth, getPostById);
 

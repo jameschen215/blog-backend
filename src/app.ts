@@ -7,6 +7,7 @@ import passport from 'passport';
 import cookieParser from 'cookie-parser';
 
 import authRoutes from './routes/auth.routes';
+import identityRoutes from './routes/identity.routes';
 import postRoutes from './routes/post.routes';
 import { jwtStrategy } from './config/passport.config';
 import { errorHandler } from './middleware/error-handler';
@@ -35,6 +36,7 @@ passport.use(jwtStrategy);
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api', identityRoutes);
 app.use('/api/posts', postRoutes);
 
 // 404 handler

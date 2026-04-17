@@ -26,7 +26,10 @@ export const getAllPosts: RequestHandler = async (req, res, next) => {
 
 export const getPostsByAuthor: RequestHandler = async (req, res, next) => {
   try {
-    const authorId = Number(req.params.authorId);
+    const authorId =
+      req.params.authorId === 'me' || !req.params.authorId
+        ? req.user?.id
+        : Number(req.params.authorId);
     const userId = req.user?.id;
 
     if (!authorId || isNaN(authorId)) {

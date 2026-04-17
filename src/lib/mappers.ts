@@ -4,11 +4,22 @@ export type UserShape = {
   role: string;
 };
 
+export type CurrentUserShape = UserShape & {
+  email: string;
+};
+
 export function mapUser(user: UserShape) {
   return {
     id: user.id,
     username: user.username,
     role: user.role,
+  };
+}
+
+export function mapCurrentUser(user: CurrentUserShape) {
+  return {
+    ...mapUser(user),
+    email: user.email,
   };
 }
 

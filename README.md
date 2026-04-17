@@ -36,12 +36,26 @@ curl -i -b cookies.txt \
   -X POST http://localhost:8000/api/auth/logout
 ```
 
+Get current user (auth required):
+
+```bash
+curl -i -b cookies.txt \
+  http://localhost:8000/api/me
+```
+
 ### Posts
 
 List posts (paginated):
 
 ```bash
 curl "http://localhost:8000/api/posts?page=1&limit=5"
+```
+
+List my posts, including drafts (auth required):
+
+```bash
+curl -i -b cookies.txt \
+  http://localhost:8000/api/posts/me
 ```
 
 Get a post by ID:
