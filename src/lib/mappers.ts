@@ -52,6 +52,7 @@ export type CommentShape = {
   id: number;
   content: string;
   createdAt: Date;
+  updatedAt: Date;
   author: UserShape;
 };
 
@@ -60,6 +61,7 @@ export function mapComment(comment: CommentShape) {
     id: comment.id,
     content: comment.content,
     createdAt: comment.createdAt,
+    updatedAt: comment.updatedAt,
     author: mapUser(comment.author),
   };
 }

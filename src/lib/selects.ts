@@ -38,6 +38,7 @@ export const commentSelect = {
   id: true,
   content: true,
   createdAt: true,
+  updatedAt: true,
   author: {
     select: userSelect,
   },
