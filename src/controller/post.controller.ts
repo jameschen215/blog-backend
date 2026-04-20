@@ -16,8 +16,9 @@ export const getAllPosts: RequestHandler = async (req, res, next) => {
   try {
     const userId = req.user?.id;
     const pagination = getPagination(req.query);
+    const search = req.query.search as string | undefined;
 
-    const result = await getAllPostsService({ userId, pagination });
+    const result = await getAllPostsService({ userId, pagination, search });
     res.status(200).json(result);
   } catch (error) {
     next(error);

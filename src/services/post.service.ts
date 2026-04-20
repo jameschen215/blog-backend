@@ -8,17 +8,33 @@ import {
   postListSelect,
   postWriteSelect,
 } from '../lib/selects';
+import { Prisma } from '../generated/prisma/client';
 
 export async function getAllPostsService(params: {
   userId?: number;
   pagination: Pagination;
+  search?: string;
 }) {
-  const { userId, pagination } = params;
+  const { userId, pagination, search } = params;
   const { page, limit, skip } = pagination;
 
-  const where = userId
-    ? { OR: [{ published: true }, { authorId: userId, published: false }] }
-    : { published: true };
+  const where: Prisma.PostWhereInput = {
+    AND: [
+      userId
+        ? { OR: [{ published: true }, { authorId: userId, published: false }] }
+        : { published: true },
+      ...(search
+        ? [
+            {
+              OR: [
+                { title: { contains: search, mode: 'insensitive' as const } },
+                { content: { contains: search, mode: 'insensitive' as const } },
+              ],
+            },
+          ]
+        : []),
+    ],
+  };
 
   const total = await prisma.post.count({ where });
   const posts = await prisma.post.findMany({
