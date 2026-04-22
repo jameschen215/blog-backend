@@ -9,5 +9,13 @@ declare global {
       username: string;
       role: Role;
     }
+
+    interface Request {
+      validated?: {
+        body?: unknown;
+        params?: unknown;
+        query?: unknown;
+      };
+    }
   }
 }

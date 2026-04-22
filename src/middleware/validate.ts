@@ -34,20 +34,25 @@ export const validate = (
 
   return async (req, res, next) => {
     const mutableReq = req as MutableRequest;
+    req.validated ??= {};
 
     try {
       if (schemas.body) {
-        mutableReq.body = await schemas.body.parseAsync(req.body);
+        const body = await schemas.body.parseAsync(req.body);
+        mutableReq.body = body;
+        req.validated.body = body;
       }
 
       if (schemas.params) {
-        mutableReq.params = (await schemas.params.parseAsync(
+        const params = (await schemas.params.parseAsync(
           req.params
         )) as Request['params'];
+        mutableReq.params = params;
+        req.validated.params = params;
       }
 
       if (schemas.query) {
-        mutableReq.query = (await schemas.query.parseAsync(
+        req.validated.query = (await schemas.query.parseAsync(
           req.query
         )) as Request['query'];
       }

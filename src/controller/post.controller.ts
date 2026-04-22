@@ -14,9 +14,15 @@ import {
 export const getAllPosts: RequestHandler = async (req, res, next) => {
   try {
     const userId = req.user?.id;
-    const pagination = getPagination(req.query);
-    const search = req.query.search as string | undefined;
-    const sort = req.query.sort as 'latest' | 'likes' | 'comments' | undefined;
+    const query = (req.validated?.query ?? req.query) as {
+      page?: number;
+      limit?: number;
+      search?: string;
+      sort?: 'latest' | 'likes' | 'comments';
+    };
+    const pagination = getPagination(query);
+    const search = query.search;
+    const sort = query.sort;
 
     const result = await getAllPostsService({
       userId,
