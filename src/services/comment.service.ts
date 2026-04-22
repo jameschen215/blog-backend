@@ -36,13 +36,14 @@ export async function createCommentService(params: {
 
 export async function updateCommentService(params: {
   userId: number;
+  postId: number;
   commentId: number;
   content: string;
 }) {
-  const { userId, commentId, content } = params;
+  const { userId, postId, commentId, content } = params;
 
-  const comment = await prisma.comment.findUnique({
-    where: { id: commentId },
+  const comment = await prisma.comment.findFirst({
+    where: { id: commentId, postId },
   });
 
   if (!comment) {
@@ -64,12 +65,13 @@ export async function updateCommentService(params: {
 
 export async function deleteCommentService(params: {
   userId: number;
+  postId: number;
   commentId: number;
 }) {
-  const { userId, commentId } = params;
+  const { userId, postId, commentId } = params;
 
-  const comment = await prisma.comment.findUnique({
-    where: { id: commentId },
+  const comment = await prisma.comment.findFirst({
+    where: { id: commentId, postId },
     include: { post: { select: { authorId: true } } },
   });
 

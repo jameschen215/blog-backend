@@ -325,14 +325,23 @@ export async function toggleLikeRcService(params: {
     requestId,
   };
 }
-export async function togglePublishService(postId: number) {
+export async function togglePublishService(params: {
+  userId: number;
+  postId: number;
+}) {
+  const { userId, postId } = params;
+
   const post = await prisma.post.findUnique({
     where: { id: postId },
-    select: { id: true, published: true },
+    select: { id: true, published: true, authorId: true },
   });
 
   if (!post) {
     throw new APIError('Post not found', 404);
+  }
+
+  if (post.authorId !== userId) {
+    throw new APIError("Cannot change other people's posts", 403);
   }
 
   const result = await prisma.post.update({
