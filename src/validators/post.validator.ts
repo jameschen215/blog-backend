@@ -1,5 +1,7 @@
 import * as z from 'zod';
 
+const positiveInt = z.coerce.number().int().positive();
+
 export const createPostSchema = z.object({
   title: z
     .string()
@@ -28,6 +30,21 @@ export const updatePostSchema = z
   .refine((data) => Object.keys(data).length > 0, {
     message: 'At least one field must be provided for update',
   });
+
+export const postIdParamSchema = z.object({
+  postId: positiveInt,
+});
+
+export const authorIdParamSchema = z.object({
+  authorId: positiveInt,
+});
+
+export const postListQuerySchema = z.object({
+  page: positiveInt.optional(),
+  limit: z.coerce.number().int().positive().max(50).optional(),
+  search: z.string().trim().min(1).optional(),
+  sort: z.enum(['latest', 'likes', 'comments']).optional(),
+});
 
 export type CreatePostInput = z.infer<typeof createPostSchema>;
 export type UpdatePostInput = z.infer<typeof updatePostSchema>;

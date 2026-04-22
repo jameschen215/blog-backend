@@ -13,12 +13,17 @@ import {
   updatePost,
 } from '../controller/post.controller';
 import {
+  authorIdParamSchema,
   createPostSchema,
+  postIdParamSchema,
+  postListQuerySchema,
   updatePostSchema,
 } from '../validators/post.validator';
 import { validate } from '../middleware/validate';
 import { optionalAuth, requireLogin } from '../middleware/auth';
 import {
+  commentParamsSchema,
+  commentPostParamsSchema,
   createCommentSchema,
   updateCommentSchema,
 } from '../validators/comment.validator';
@@ -36,10 +41,15 @@ import {
 const router = Router();
 
 // Post routes
-router.get('/', optionalAuth, getAllPosts);
+router.get('/', optionalAuth, validate({ query: postListQuerySchema }), getAllPosts);
 router.get('/me', requireLogin, getPostsByAuthor);
-router.get('/authors/:authorId', optionalAuth, getPostsByAuthor);
-router.get('/:postId', optionalAuth, getPostById);
+router.get(
+  '/authors/:authorId',
+  optionalAuth,
+  validate({ params: authorIdParamSchema }),
+  getPostsByAuthor
+);
+router.get('/:postId', optionalAuth, validate({ params: postIdParamSchema }), getPostById);
 
 router.post(
   '/',
@@ -48,26 +58,47 @@ router.post(
   validate(createPostSchema),
   createPost
 );
-router.put('/:postId', requireLogin, validate(updatePostSchema), updatePost);
-router.delete('/:postId', requireLogin, deletePost);
-router.post('/:postId/like', requireLogin, postLikeLimiter, toggleLike);
-router.post('/:postId/publish', requireLogin, togglePublish);
+router.put(
+  '/:postId',
+  requireLogin,
+  validate({ params: postIdParamSchema, body: updatePostSchema }),
+  updatePost
+);
+router.delete('/:postId', requireLogin, validate({ params: postIdParamSchema }), deletePost);
+router.post(
+  '/:postId/like',
+  requireLogin,
+  validate({ params: postIdParamSchema }),
+  postLikeLimiter,
+  toggleLike
+);
+router.post(
+  '/:postId/publish',
+  requireLogin,
+  validate({ params: postIdParamSchema }),
+  togglePublish
+);
 
 // Comment routes
 router.post(
   '/:postId/comments',
-  commentLimiter,
-  // optionalAuth,
   requireLogin,
+  validate({ params: commentPostParamsSchema }),
+  commentLimiter,
   validate(createCommentSchema),
   createComment
 );
 router.put(
   '/:postId/comments/:commentId',
   requireLogin,
-  validate(updateCommentSchema),
+  validate({ params: commentParamsSchema, body: updateCommentSchema }),
   updateComment
 );
-router.delete('/:postId/comments/:commentId', requireLogin, deleteComment);
+router.delete(
+  '/:postId/comments/:commentId',
+  requireLogin,
+  validate({ params: commentParamsSchema }),
+  deleteComment
+);
 
 export default router;

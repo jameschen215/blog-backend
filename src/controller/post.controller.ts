@@ -6,7 +6,6 @@ import {
   getAllPostsService,
   getPostByIdService,
   getPostsByAuthorService,
-  toggleLikeRcService,
   toggleLikeService,
   togglePublishService,
   updatePostService,
@@ -33,17 +32,10 @@ export const getAllPosts: RequestHandler = async (req, res, next) => {
 
 export const getPostsByAuthor: RequestHandler = async (req, res, next) => {
   try {
-    const authorId =
-      req.params.authorId === 'me' || !req.params.authorId
-        ? req.user?.id
-        : Number(req.params.authorId);
+    const authorId = req.params.authorId
+      ? Number(req.params.authorId)
+      : req.user!.id;
     const userId = req.user?.id;
-
-    if (!authorId || isNaN(authorId)) {
-      return res.status(400).json({
-        message: 'Invalid author ID',
-      });
-    }
 
     const result = await getPostsByAuthorService({
       authorId,
@@ -60,10 +52,6 @@ export const getPostById: RequestHandler = async (req, res, next) => {
   try {
     const userId = req.user?.id;
     const postId = Number(req.params.postId);
-
-    if (!postId || isNaN(postId)) {
-      return res.status(400).json({ message: 'Invalid post ID' });
-    }
 
     const result = await getPostByIdService({ postId, userId });
     res.status(200).json(result);
@@ -95,18 +83,6 @@ export const updatePost: RequestHandler = async (req, res, next) => {
     const postId = Number(req.params.postId);
     const { title, content, published } = req.body;
 
-    if (!postId || isNaN(postId)) {
-      return res.status(400).json({
-        message: 'Invalid post ID',
-      });
-    }
-    // Check if at least one field is provided - be careful for boolean value false
-    if (!title && !content && published === undefined) {
-      return res.status(400).json({
-        message: 'At least one field must be provided',
-      });
-    }
-
     const result = await updatePostService({
       userId,
       postId,
@@ -128,13 +104,6 @@ export const deletePost: RequestHandler = async (req, res, next) => {
     const userId = req.user!.id;
     const postId = Number(req.params.postId);
 
-    // Check if post ID is valid
-    if (!postId || isNaN(postId)) {
-      return res.status(400).json({
-        message: 'Invalid post ID',
-      });
-    }
-
     await deletePostService({ userId, postId });
 
     res.sendStatus(204).end();
@@ -148,30 +117,7 @@ export const toggleLike: RequestHandler = async (req, res, next) => {
     const userId = req.user!.id;
     const postId = Number(req.params.postId);
 
-    if (!Number.isInteger(postId) || postId < 1) {
-      return res.status(400).json({ message: 'Invalid post ID' });
-    }
     const result = await toggleLikeService({ userId, postId });
-    res.status(200).json(result);
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const toggleLikeRC: RequestHandler = async (req, res, next) => {
-  try {
-    const userId = req.user!.id;
-    const postId = Number(req.params.postId);
-    const requestId = Number(req.body?.requestId);
-
-    if (!Number.isInteger(requestId) || requestId < 1) {
-      return res.status(400).json({ message: 'Invalid request ID' });
-    }
-
-    if (!Number.isInteger(postId) || postId < 1) {
-      return res.status(400).json({ message: 'Invalid post ID' });
-    }
-    const result = await toggleLikeRcService({ userId, postId, requestId });
     res.status(200).json(result);
   } catch (error) {
     next(error);
@@ -182,10 +128,6 @@ export const togglePublish: RequestHandler = async (req, res, next) => {
   try {
     const userId = req.user!.id;
     const postId = parseInt(req.params.postId);
-
-    if (isNaN(postId) || postId < 1) {
-      return res.status(400).json({ message: 'Invalid post ID' });
-    }
 
     const result = await togglePublishService({ userId, postId });
 

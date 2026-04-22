@@ -194,78 +194,6 @@ export async function toggleLikeService(params: {
   postId: number;
 }) {
   const { userId, postId } = params;
-  let liked = false;
-
-  const post = await prisma.post.findUnique({
-    where: { id: postId },
-    select: { id: true, published: true },
-  });
-
-  if (!post) {
-    throw new APIError('Post not found', 404);
-  }
-
-  if (!post.published) {
-    throw new APIError('Cannot like an unpublished post', 403);
-  }
-
-  const existingLike = await prisma.like.findUnique({
-    where: {
-      userId_postId: { userId, postId },
-    },
-  });
-
-  if (existingLike) {
-    try {
-      await prisma.like.delete({
-        where: { id: existingLike.id },
-      });
-
-      liked = false;
-    } catch (error) {
-      if (
-        error instanceof PrismaClientKnownRequestError &&
-        error.code === 'P2025'
-      ) {
-        liked = false;
-      } else {
-        throw error;
-      }
-    }
-  } else {
-    try {
-      await prisma.like.create({
-        data: { userId, postId },
-      });
-      liked = true;
-    } catch (error) {
-      if (
-        error instanceof PrismaClientKnownRequestError &&
-        error.code === 'P2002'
-      ) {
-        liked = true;
-      } else {
-        throw error;
-      }
-    }
-  }
-
-  const likesCount = await prisma.like.count({
-    where: { postId },
-  });
-
-  return {
-    liked,
-    likes: likesCount,
-  };
-}
-
-export async function toggleLikeRcService(params: {
-  userId: number;
-  postId: number;
-  requestId: number;
-}) {
-  const { userId, postId, requestId } = params;
 
   const post = await prisma.post.findUnique({
     where: { id: postId },
@@ -322,7 +250,6 @@ export async function toggleLikeRcService(params: {
   return {
     liked: result.liked,
     likes: result.likesCount,
-    requestId,
   };
 }
 export async function togglePublishService(params: {

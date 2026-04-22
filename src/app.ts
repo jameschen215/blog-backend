@@ -33,6 +33,7 @@ app.use('/api', generalLimiter);
 
 // Passport configuration
 passport.use(jwtStrategy);
+app.use(passport.initialize());
 
 // Routes
 app.use('/api/auth', authRoutes);
