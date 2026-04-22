@@ -824,7 +824,7 @@ import rateLimit from 'express-rate-limit';
 // General API rate limiter - 100 requests per 15 minutes
 export const generalLimiter = rateLimit({
   windowMs: 1000 * 60 * 15,
-  max: 100,
+  max: 1000,
   message: {
     message: 'Too many requests, please try again later',
   },
@@ -1044,8 +1044,9 @@ export const getAllPosts: RequestHandler = async (req, res, next) => {
   try {
     const userId = req.user?.id;
     const pagination = getPagination(req.query);
+    const search = req.query.search as string | undefined;
 
-    const result = await getAllPostsService({ userId, pagination });
+    const result = await getAllPostsService({ userId, pagination, search });
     res.status(200).json(result);
   } catch (error) {
     next(error);
@@ -9609,6 +9610,7 @@ export type CommentShape = {
   id: number;
   content: string;
   createdAt: Date;
+  updatedAt: Date;
   author: UserShape;
 };
 
@@ -9617,6 +9619,7 @@ export function mapComment(comment: CommentShape) {
     id: comment.id,
     content: comment.content,
     createdAt: comment.createdAt,
+    updatedAt: comment.updatedAt,
     author: mapUser(comment.author),
   };
 }
@@ -9771,6 +9774,7 @@ export const commentSelect = {
   id: true,
   content: true,
   createdAt: true,
+  updatedAt: true,
   author: {
     select: userSelect,
   },
@@ -10374,17 +10378,33 @@ import {
   postListSelect,
   postWriteSelect,
 } from '../lib/selects';
+import { Prisma } from '../generated/prisma/client';
 
 export async function getAllPostsService(params: {
   userId?: number;
   pagination: Pagination;
+  search?: string;
 }) {
-  const { userId, pagination } = params;
+  const { userId, pagination, search } = params;
   const { page, limit, skip } = pagination;
 
-  const where = userId
-    ? { OR: [{ published: true }, { authorId: userId, published: false }] }
-    : { published: true };
+  const where: Prisma.PostWhereInput = {
+    AND: [
+      userId
+        ? { OR: [{ published: true }, { authorId: userId, published: false }] }
+        : { published: true },
+      ...(search
+        ? [
+            {
+              OR: [
+                { title: { contains: search, mode: 'insensitive' as const } },
+                { content: { contains: search, mode: 'insensitive' as const } },
+              ],
+            },
+          ]
+        : []),
+    ],
+  };
 
   const total = await prisma.post.count({ where });
   const posts = await prisma.post.findMany({

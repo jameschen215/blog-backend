@@ -10,12 +10,15 @@ import {
 } from '../lib/selects';
 import { Prisma } from '../generated/prisma/client';
 
+type SortKey = 'latest' | 'likes' | 'comments';
+
 export async function getAllPostsService(params: {
   userId?: number;
   pagination: Pagination;
   search?: string;
+  sort?: SortKey;
 }) {
-  const { userId, pagination, search } = params;
+  const { userId, pagination, search, sort = 'latest' } = params;
   const { page, limit, skip } = pagination;
 
   const where: Prisma.PostWhereInput = {
@@ -36,10 +39,17 @@ export async function getAllPostsService(params: {
     ],
   };
 
+  const orderBy: Prisma.PostOrderByWithRelationInput =
+    sort === 'likes'
+      ? { likes: { _count: 'desc' } }
+      : sort === 'comments'
+        ? { comments: { _count: 'desc' } }
+        : { createdAt: 'desc' };
+
   const total = await prisma.post.count({ where });
   const posts = await prisma.post.findMany({
     where,
-    orderBy: { createdAt: 'desc' },
+    orderBy,
     skip,
     take: limit,
     select: postListSelect,
