@@ -10,11 +10,14 @@ type RequestSchemas = {
 type MutableRequest = Request & {
   body: unknown;
   params: unknown;
-  query: unknown;
 };
 
+// “this function checks at runtime whether schema is a Zod schema,
+// and if it is, TypeScript may treat it as that type afterward.”
 function isZodSchema(schema: ZodType | RequestSchemas): schema is ZodType {
-  return typeof (schema as ZodType).safeParseAsync === 'function';
+  return (
+    typeof schema === 'object' && schema !== null && 'parseAsync' in schema
+  );
 }
 
 function formatValidationError(error: ZodError) {
@@ -27,23 +30,33 @@ function formatValidationError(error: ZodError) {
   };
 }
 
-export const validate = (
-  schema: ZodType | RequestSchemas
-): RequestHandler => {
+export const validate = (schema: ZodType | RequestSchemas): RequestHandler => {
   const schemas = isZodSchema(schema) ? { body: schema } : schema;
 
   return async (req, res, next) => {
+    // Create a writable request alias
+    // This is the TypeScript workaround that lets the middleware write parsed values back onto:
+    // - req.body
+    // - req.params
+    // - req.query
     const mutableReq = req as MutableRequest;
+
+    // If req.validated is null/undefined, initialize it as {}
+    // ??= is the nullish coalescing assignment operator
     req.validated ??= {};
 
     try {
       if (schemas.body) {
         const body = await schemas.body.parseAsync(req.body);
+
+        // - req.body gives downstream code the normalized runtime value directly
+        // - req.validated.body keeps a separate record of “this came from validation”
         mutableReq.body = body;
         req.validated.body = body;
       }
 
       if (schemas.params) {
+        // Treat this parsed value as the same type as req.params
         const params = (await schemas.params.parseAsync(
           req.params
         )) as Request['params'];
@@ -52,9 +65,10 @@ export const validate = (
       }
 
       if (schemas.query) {
-        req.validated.query = (await schemas.query.parseAsync(
+        const query = (await schemas.query.parseAsync(
           req.query
         )) as Request['query'];
+        req.validated.query = query;
       }
 
       next();

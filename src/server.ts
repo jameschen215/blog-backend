@@ -1,7 +1,7 @@
-import { Server } from 'node:http';
 import app from './app';
-import { validateEnv } from './config/env.config';
+import { Server } from 'node:http';
 import { prisma } from './lib/prisma';
+import { validateEnv } from './config/env.config';
 
 const env = validateEnv();
 const PORT = Number(env.PORT);
@@ -10,9 +10,7 @@ let server: Server | undefined;
 let shuttingDown = false;
 
 async function shutdown(signal: string, exitCode = 0) {
-  if (shuttingDown) {
-    return;
-  }
+  if (shuttingDown) return;
 
   shuttingDown = true;
   console.error(`${signal} received, shutting down`);

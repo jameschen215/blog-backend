@@ -2,7 +2,7 @@
 
 import rateLimit from 'express-rate-limit';
 
-// General API rate limiter - 100 requests per 15 minutes
+// General API rate limiter - 1000 requests per 15 minutes
 export const generalLimiter = rateLimit({
   windowMs: 1000 * 60 * 15,
   max: 1000,
@@ -39,7 +39,7 @@ export const postLimiter = rateLimit({
 // Post like rate limiter - 5 likes per minute
 export const postLikeLimiter = rateLimit({
   windowMs: 1000 * 60,
-  max: 60,
+  max: 5,
   message: {
     message: 'Like the post too often, please try later',
   },
