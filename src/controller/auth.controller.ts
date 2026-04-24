@@ -25,6 +25,7 @@ export const registerUser: RequestHandler = async (req, res, next) => {
         email: user.email,
         role: user.role,
       },
+      token,
     });
   } catch (error) {
     next(error);
