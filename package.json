@@ -8,7 +8,8 @@
     "start": "node dist/server.js",
     "lint": "eslint",
     "format": "prettier --write .",
-    "seed": "tsx prisma/seed.ts"
+    "seed": "tsx prisma/seed.ts",
+    "seed:deploy": "tsx prisma/seed-deploy.ts"
   },
   "keywords": [],
   "author": "",
