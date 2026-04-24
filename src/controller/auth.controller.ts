@@ -41,6 +41,7 @@ export const loginUser: RequestHandler = async (req, res, next) => {
 
     res.status(200).json({
       user,
+      token,
     });
   } catch (error) {
     next(error);
