@@ -28,6 +28,11 @@ app.use(morgan('dev'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+// Health check
+app.get('/health', (_req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
 // Apply general rate limiter to all routes
 app.use('/api', generalLimiter);
 
