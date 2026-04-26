@@ -15,11 +15,19 @@ import { generalLimiter } from './config/rate-limit.config';
 
 const app = express();
 
+const allowedOrigins = ['http://localhost:5173/', process.env.CLIENT_URL];
+
 // Middleware
 app.use(cookieParser());
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
   })
 );
