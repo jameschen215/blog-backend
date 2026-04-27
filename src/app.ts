@@ -15,7 +15,7 @@ import { generalLimiter } from './config/rate-limit.config';
 
 const app = express();
 
-const allowedOrigins = ['http://localhost:5173/', process.env.CLIENT_URL];
+const allowedOrigins = ['http://localhost:5173', process.env.CLIENT_URL];
 
 // Middleware
 app.use(cookieParser());
