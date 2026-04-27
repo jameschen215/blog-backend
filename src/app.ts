@@ -34,7 +34,7 @@ app.use(
 app.use(helmet());
 app.use(morgan('dev'));
 app.use(express.urlencoded({ extended: true }));
-app.use(express.json({ limit: '10mb' }));
+app.use(express.json());
 
 // Health check
 app.get('/health', (_req, res) => {
