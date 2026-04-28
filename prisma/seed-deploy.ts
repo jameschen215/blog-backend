@@ -11,7 +11,12 @@ const prisma = new PrismaClient({ adapter });
 const SALT_ROUNDS = 10;
 
 async function main() {
-  const hashedPassword = await bcrypt.hash('820215', SALT_ROUNDS);
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  if (!adminPassword) {
+    throw new Error('ADMIN_PASSWORD environment variable is required');
+  }
+
+  const hashedPassword = await bcrypt.hash(adminPassword, SALT_ROUNDS);
 
   await prisma.user.upsert({
     where: { email: 'james@odin.com' },
