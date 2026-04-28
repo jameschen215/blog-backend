@@ -3,6 +3,6 @@ dist/
 *.env
 /generated/prisma
 
-
+coverage/
 
 /generated/prisma
