@@ -4,12 +4,11 @@ import {
   createPost,
   deletePost,
   getAllPosts,
+  getMyPosts,
   getPostById,
   getPostsByAuthor,
   toggleLike,
   togglePublish,
-  // toggleLikeRC,
-  // toggleLikeSV,
   updatePost,
 } from '../controller/post.controller';
 import {
@@ -41,15 +40,25 @@ import {
 const router = Router();
 
 // Post routes
-router.get('/', optionalAuth, validate({ query: postListQuerySchema }), getAllPosts);
-router.get('/me', requireLogin, getPostsByAuthor);
+router.get(
+  '/',
+  optionalAuth,
+  validate({ query: postListQuerySchema }),
+  getAllPosts
+);
+router.get('/me', requireLogin, getMyPosts);
 router.get(
   '/authors/:authorId',
   optionalAuth,
   validate({ params: authorIdParamSchema }),
   getPostsByAuthor
 );
-router.get('/:postId', optionalAuth, validate({ params: postIdParamSchema }), getPostById);
+router.get(
+  '/:postId',
+  optionalAuth,
+  validate({ params: postIdParamSchema }),
+  getPostById
+);
 
 router.post(
   '/',
@@ -64,7 +73,12 @@ router.put(
   validate({ params: postIdParamSchema, body: updatePostSchema }),
   updatePost
 );
-router.delete('/:postId', requireLogin, validate({ params: postIdParamSchema }), deletePost);
+router.delete(
+  '/:postId',
+  requireLogin,
+  validate({ params: postIdParamSchema }),
+  deletePost
+);
 router.post(
   '/:postId/like',
   requireLogin,

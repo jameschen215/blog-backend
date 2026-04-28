@@ -87,6 +87,16 @@ export async function getPostsByAuthorService(params: { authorId: number }) {
   };
 }
 
+export async function getMyPostsService(authorId: number) {
+  const posts = await prisma.post.findMany({
+    where: { authorId },
+    orderBy: { createdAt: 'desc' },
+    select: postListSelect,
+  });
+
+  return { posts: posts.map(mapPostList) };
+}
+
 export async function getPostByIdService(params: {
   postId: number;
   userId?: number;

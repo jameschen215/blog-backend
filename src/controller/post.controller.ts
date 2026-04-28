@@ -4,6 +4,7 @@ import {
   createPostService,
   deletePostService,
   getAllPostsService,
+  getMyPostsService,
   getPostByIdService,
   getPostsByAuthorService,
   toggleLikeService,
@@ -42,6 +43,15 @@ export const getPostsByAuthor: RequestHandler = async (req, res, next) => {
 
     const result = await getPostsByAuthorService({ authorId });
 
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getMyPosts: RequestHandler = async (req, res, next) => {
+  try {
+    const result = await getMyPostsService(req.user!.id);
     res.status(200).json(result);
   } catch (error) {
     next(error);
