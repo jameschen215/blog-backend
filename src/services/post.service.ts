@@ -13,19 +13,16 @@ import { Prisma } from '../generated/prisma/client';
 type SortKey = 'latest' | 'likes' | 'comments';
 
 export async function getAllPostsService(params: {
-  userId?: number;
   pagination: Pagination;
   search?: string;
   sort?: SortKey;
 }) {
-  const { userId, pagination, search, sort = 'latest' } = params;
+  const { pagination, search, sort = 'latest' } = params;
   const { page, limit, skip } = pagination;
 
   const where: Prisma.PostWhereInput = {
     AND: [
-      userId
-        ? { OR: [{ published: true }, { authorId: userId, published: false }] }
-        : { published: true },
+      { published: true }, // always published only — no userId exception
       ...(search
         ? [
             {
@@ -61,11 +58,8 @@ export async function getAllPostsService(params: {
   };
 }
 
-export async function getPostsByAuthorService(params: {
-  authorId: number;
-  userId?: number;
-}) {
-  const { authorId, userId } = params;
+export async function getPostsByAuthorService(params: { authorId: number }) {
+  const { authorId } = params;
 
   const author = await prisma.user.findUnique({
     where: { id: authorId },
@@ -78,7 +72,7 @@ export async function getPostsByAuthorService(params: {
 
   const where = {
     authorId,
-    ...(userId === authorId ? {} : { published: true }),
+    published: true,
   };
 
   const posts = await prisma.post.findMany({

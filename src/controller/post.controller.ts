@@ -13,7 +13,6 @@ import {
 
 export const getAllPosts: RequestHandler = async (req, res, next) => {
   try {
-    const userId = req.user?.id;
     const query = (req.validated?.query ?? req.query) as {
       page?: number;
       limit?: number;
@@ -25,7 +24,6 @@ export const getAllPosts: RequestHandler = async (req, res, next) => {
     const sort = query.sort;
 
     const result = await getAllPostsService({
-      userId,
       pagination,
       search,
       sort,
@@ -41,12 +39,8 @@ export const getPostsByAuthor: RequestHandler = async (req, res, next) => {
     const authorId = req.params.authorId
       ? Number(req.params.authorId)
       : req.user!.id;
-    const userId = req.user?.id;
 
-    const result = await getPostsByAuthorService({
-      authorId,
-      userId,
-    });
+    const result = await getPostsByAuthorService({ authorId });
 
     res.status(200).json(result);
   } catch (error) {
