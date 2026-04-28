@@ -135,7 +135,7 @@ export const toggleLike: RequestHandler = async (req, res, next) => {
 export const togglePublish: RequestHandler = async (req, res, next) => {
   try {
     const userId = req.user!.id;
-    const postId = parseInt(req.params.postId);
+    const postId = Number(req.params.postId);
 
     const result = await togglePublishService({ userId, postId });
 
