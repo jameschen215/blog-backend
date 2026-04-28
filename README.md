@@ -457,3 +457,29 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 - The same idea is used with `Request['query']`.
 - If Zod throws a `ZodError`, the middleware returns `400 Bad Request` with formatted validation errors.
 - If some other unexpected error happens, it calls `next(error)` so the global error handler can handle it.
+
+### Docker
+
+To deploy, follow these steps:
+
+1. Install flyctl
+   brew install flyctl
+
+2. Log in
+   fly auth login
+
+3. Register the app (uses your fly.toml, skips the guided setup)
+   fly launch --no-deploy
+
+4. Set your Neon production DATABASE_URL as a secret
+   fly secrets set DATABASE_URL="postgresql://..."
+
+5. Set the JWT secret (must be 32+ chars)
+   fly secrets set SECRET_KEY="your-production-secret-key-here"
+
+6. Optionally set your frontend URL for CORS
+   fly secrets set CLIENT_URL="https://your-frontend.com"
+
+7. Deploy
+   fly deploy
+   unset http_proxy https_proxy HTTP_PROXY HTTPS_PROXY && fly deploy

@@ -1,9 +1,9 @@
-# fly.toml app configuration file generated for blog-backend on 2026-04-27T01:25:00-07:00
+# fly.toml app configuration file generated for blog-backend-young-violet-1501 on 2026-04-27T02:24:54-07:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'blog-backend'
+app = 'blog-backend-young-violet-1501'
 primary_region = 'iad'
 
 [build]
