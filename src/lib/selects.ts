@@ -19,20 +19,7 @@ export const postListSelect = {
   },
 } as const;
 
-export const postWriteSelect = {
-  id: true,
-  title: true,
-  content: true,
-  published: true,
-  createdAt: true,
-  updatedAt: true,
-  author: {
-    select: userSelect,
-  },
-  _count: {
-    select: { comments: true, likes: true },
-  },
-} as const;
+export const postWriteSelect = postListSelect;
 
 export const commentSelect = {
   id: true,
