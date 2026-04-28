@@ -1,5 +1,5 @@
 import { RequestHandler } from 'express';
-import { clearTokenCookie, setTokenCookie } from '../config/passport.config';
+import { clearTokenCookie } from '../config/passport.config';
 import { mapCurrentUser } from '../lib/mappers';
 import {
   loginUserService,
@@ -14,9 +14,6 @@ export const registerUser: RequestHandler = async (req, res, next) => {
       username,
       password,
     });
-
-    // Set token in secure HTTP-only cookie
-    setTokenCookie(res, token);
 
     res.status(201).json({
       user: {
@@ -36,9 +33,6 @@ export const loginUser: RequestHandler = async (req, res, next) => {
   try {
     const { username, password } = req.body; // Already validated by middleware
     const { user, token } = await loginUserService({ username, password });
-
-    // Set token in secure HTTP-only cookie
-    setTokenCookie(res, token);
 
     res.status(200).json({
       user,
