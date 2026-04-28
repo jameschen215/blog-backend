@@ -16,12 +16,7 @@ export const registerUser: RequestHandler = async (req, res, next) => {
     });
 
     res.status(201).json({
-      user: {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        role: user.role,
-      },
+      user: mapCurrentUser(user),
       token,
     });
   } catch (error) {
