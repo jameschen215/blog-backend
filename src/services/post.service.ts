@@ -90,7 +90,7 @@ export async function getPostsByAuthorService(params: { authorId: number }) {
 export async function getMyPostsService(authorId: number) {
   const posts = await prisma.post.findMany({
     where: { authorId },
-    orderBy: { createdAt: 'desc' },
+    orderBy: [{ published: 'desc' }, { updatedAt: 'desc' }, { title: 'asc' }],
     select: postListSelect,
   });
 
