@@ -95,8 +95,8 @@ export const updatePost: RequestHandler = async (req, res, next) => {
       userId,
       postId,
       data: {
-        ...(title && { title }),
-        ...(content && { content }),
+        ...(title !== undefined && { title }),
+        ...(content !== undefined && { content }),
         ...(published !== undefined && { published }),
       },
     });
