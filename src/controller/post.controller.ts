@@ -37,9 +37,7 @@ export const getAllPosts: RequestHandler = async (req, res, next) => {
 
 export const getPostsByAuthor: RequestHandler = async (req, res, next) => {
   try {
-    const authorId = req.params.authorId
-      ? Number(req.params.authorId)
-      : req.user!.id;
+    const authorId = Number(req.params.authorId);
 
     const result = await getPostsByAuthorService({ authorId });
 
