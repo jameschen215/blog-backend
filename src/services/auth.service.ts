@@ -2,17 +2,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../lib/prisma';
 import { APIError } from '../lib/api-error';
-
-type RegisterInput = {
-  email: string;
-  username: string;
-  password: string;
-};
-
-type LoginInput = {
-  username: string;
-  password: string;
-};
+import { LoginInput, RegisterInput } from '../validators/auth.validator';
 
 export async function registerUserService(input: RegisterInput) {
   const { email, username, password } = input;
