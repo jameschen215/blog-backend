@@ -14,7 +14,7 @@ import {
 
 export const getAllPosts: RequestHandler = async (req, res, next) => {
   try {
-    const query = req.query as {
+    const query = req.validated!.query as {
       page?: number;
       limit?: number;
       search?: string;
