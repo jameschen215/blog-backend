@@ -1,42 +1,12 @@
-import { Request, Response } from 'express';
+import { Request } from 'express';
 import { Strategy as JwtStrategy } from 'passport-jwt';
 import { prisma } from '../lib/prisma';
 
-/**
- * Cookie configuration for JWT tokens
- */
-export const cookieConfig = {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite:
-    process.env.NODE_ENV === 'production'
-      ? ('none' as const)
-      : ('lax' as const),
-  path: '/',
-};
-
-/**
- * Extract JWT from cookies
- */
 function cookieExtractor(req: Request): string | null {
   if (req && req.cookies && req.cookies.jwt) {
     return req.cookies.jwt;
   }
   return null;
-}
-
-/**
- * Set JWT token in secure HTTP-only cookie
- */
-export function setTokenCookie(res: Response, token: string): void {
-  res.cookie('jwt', token, cookieConfig);
-}
-
-/**
- * Clear JWT token cookie (for logout)
- */
-export function clearTokenCookie(res: Response): void {
-  res.clearCookie('jwt', cookieConfig);
 }
 
 const opts = {

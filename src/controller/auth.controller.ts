@@ -1,5 +1,4 @@
 import { RequestHandler } from 'express';
-import { clearTokenCookie } from '../config/passport.config';
 import { mapCurrentUser } from '../lib/mappers';
 import {
   loginUserService,
@@ -38,14 +37,8 @@ export const loginUser: RequestHandler = async (req, res, next) => {
   }
 };
 
-export const logoutUser: RequestHandler = async (_req, res, next) => {
-  try {
-    clearTokenCookie(res);
-
-    res.status(200).json({ success: true });
-  } catch (error) {
-    next(error);
-  }
+export const logoutUser: RequestHandler = (_req, res) => {
+  res.status(200).json({ success: true });
 };
 
 export const getCurrentUser: RequestHandler = async (req, res, next) => {
