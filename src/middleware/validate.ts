@@ -10,6 +10,7 @@ type RequestSchemas = {
 type MutableRequest = Request & {
   body: unknown;
   params: unknown;
+  query: unknown;
 };
 
 // “this function checks at runtime whether schema is a Zod schema,
@@ -68,6 +69,7 @@ export const validate = (schema: ZodType | RequestSchemas): RequestHandler => {
         const query = (await schemas.query.parseAsync(
           req.query
         )) as Request['query'];
+        mutableReq.query = query;
         req.validated.query = query;
       }
 
