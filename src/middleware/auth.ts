@@ -1,6 +1,5 @@
 import passport from 'passport';
 import { RequestHandler } from 'express';
-import { Role } from '../generated/prisma/client';
 
 export const requireLogin: RequestHandler = (req, res, next) => {
   passport.authenticate(
@@ -38,21 +37,4 @@ export const optionalAuth: RequestHandler = (req, res, next) => {
       next(); // Always continue, even without user
     }
   )(req, res, next);
-};
-
-// Role-based authorization
-export const requireRole = (...roles: Role[]): RequestHandler => {
-  return (req, res, next) => {
-    if (!req.user) {
-      return res.status(401).json({ message: 'Authentication required' });
-    }
-
-    if (!roles.includes(req.user.role)) {
-      return res.status(403).json({
-        message: 'Insufficient permissions',
-      });
-    }
-
-    next();
-  };
 };
